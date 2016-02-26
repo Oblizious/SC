@@ -1,5 +1,7 @@
 package myWhats;
 
 public class MyWhats {
-	int b = 10;
+	
+	private int a = 10;
+
 }
