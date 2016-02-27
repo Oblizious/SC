@@ -1,6 +1,7 @@
 package myWhats;
 
 import java.util.Scanner;
+import static myWhats.MyWhatsStub.*;
 
 public class MyWhats {
 
@@ -23,13 +24,9 @@ public class MyWhats {
             else if(args.length == 3) { 
                 password = pedirPassword();
                 
-                boolean registou = MyWhatsStub.criaConta(args[0], password);
-                
-                if(registou)
-                    System.out.println("Conta não existia e foi criada com sucesso.");
-                else
-                    System.out.println("A conta já se encontra registada.");   
-                                 
+                String result = createUser(args[0], password, args[1]);
+                 
+                System.out.println(result);                 
                 System.exit(0);
            }
         }else{
@@ -40,41 +37,39 @@ public class MyWhats {
         if(args.length >= index + 1)  {
             switch(args[index]){
                 case "-m":
-                    boolean result = args.length > index + 2 ? sendMessage(args[index+1],args[index+2],args[0],password) : faltamArgumentos();
+                    System.out.println(args.length > index + 2 ? sendMessage(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
                     break;
                 
                 case "-f":
-                    args.length > index + 2 ? enviarFicheiro(args[index+1],args[index+2],args[0],password) : faltamArgumentos();
+                	System.out.println(args.length > index + 2 ? sendFile(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
                     break;
                  
                 case "-r":
                     if(args.length == index)
-                        comunicacoesMaisRecentes(args[0],password);
+                    	System.out.println(getMostRecentCommunications(args[0], password, args[1]));
                     else if(args.length == index + 1)
-                        todasComunicacoes(args[index + 1], args[0],password);
+                    	System.out.println(getAllContactCommunications(args[0], password, args[1], args[index + 1]));
                     else if(args.length == index + 2)
-                        buscFicheiro(args[index + 1], args[index + 2], args[0],password);
+                    	System.out.println(getContactFile(args[0], password, args[1], args[index + 1], args[index + 2]));
                     break;
                 
                 case "-a":
-                    args.length > index + 2 ? adicionarAoGrupo(args[index+1],args[index+2],args[0],password) : faltamArgumentos();
+                	System.out.println(args.length > index + 2 ? addToGroup(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
                     break;
                 
                 case "-d":
-                    args.length > index + 2 ? removerDoGrupo(args[index+1],args[index+2],args[0],password) : faltamArgumentos();
+                	System.out.println(args.length > index + 2 ? removeFromGroup(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
                     break;
-                
             }
-            
         }
     }    
     
     private static String pedirPassword(){
         Scanner sc = new Scanner(System.in);
-        System.out.println("Insira password : ");
+        System.out.println("Insira password: ");
         String password = sc.nextLine();
         sc.close();
         return password;
-    }    
+    }
 }
 

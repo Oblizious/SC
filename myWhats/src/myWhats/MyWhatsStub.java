@@ -1,7 +1,6 @@
 package myWhats;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,7 +18,7 @@ public class MyWhatsStub {
 		
 		try {
 			login(localUser, password);
-			objOutStream.writeObject(Constants.END_MESSAGE);
+			objOutStream.writeObject(MessageFlags.END_MESSAGE);
 			result = (String)objInStream.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -34,10 +33,10 @@ public class MyWhatsStub {
     
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(Constants.M_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.M_MESSAGE);
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(text);
-    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
@@ -53,10 +52,10 @@ public class MyWhatsStub {
     	
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(Constants.F_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.F_MESSAGE);
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(file);
-    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
@@ -66,16 +65,13 @@ public class MyWhatsStub {
 		return result;
     }
     
-    public static String mostRecent(String nome, String password, String server) {
+    public static String getMostRecentCommunications(String localUser, String password, String serverAddress) {
     	startConnection(localUser, password, serverAddress);
-    	File file = new File(filename);
     	
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(Constants.F_MESSAGE);
-    		objOutStream.writeObject(contact);
-    		objOutStream.writeObject(file);
-    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
@@ -85,31 +81,78 @@ public class MyWhatsStub {
 		return result;
     }
 
-    public static String todasComunicacoes(String nome, String password, String server, String contacto) {
-    
+    public static String getAllContactCommunications(String localUser, String password, String serverAddress, String contact) {
+    	startConnection(localUser, password, serverAddress);
+    	
+    	try {
+    		login(localUser, password);
+    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
+    		result = (String)objInStream.readObject();
+    	} catch(IOException | ClassNotFoundException e) {
+    		e.printStackTrace();
+    	}
+    	
+		closeConnection(socket, objInStream, objOutStream);
+		return result;
     }
     
-    public static File buscaFicheiro(String nome, String password, String server, String contacto, String ficheiro) {
-    
+    public static File getContactFile(String localUser, String password, String serverAddress, String contact, String filename) {
+    	startConnection(localUser, password, serverAddress);
+    	File file = null;
+    	
+    	try {
+    		login(localUser, password);
+    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(filename);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
+    		file = (File)objInStream.readObject();
+    	} catch(IOException | ClassNotFoundException e) {
+    		e.printStackTrace();
+    	}
+    	
+		closeConnection(socket, objInStream, objOutStream);
+		return file;
     }
     
-    public static boolean adicionarAoGrupo(String nome, String password, String server, String utilizador, String grupo) {
-    
+    public static String addToGroup(String localUser, String password, String serverAddress, String contact, String group) {
+    	startConnection(localUser, password, serverAddress);
+    	
+    	try {
+    		login(localUser, password);
+    		objOutStream.writeObject(MessageFlags.A_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(group);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
+    		result = (String)objInStream.readObject();
+    	} catch(IOException | ClassNotFoundException e) {
+    		e.printStackTrace();
+    	}
+    	
+		closeConnection(socket, objInStream, objOutStream);
+		return result;
    }
     
-    public static boolean removerDoGrupo(String nome, String password, String server, String utilizador, String grupo){
-    
+    public static String removeFromGroup(String localUser, String password, String serverAddress, String contact, String group){
+    	startConnection(localUser, password, serverAddress);
+    	
+    	try {
+    		login(localUser, password);
+    		objOutStream.writeObject(MessageFlags.D_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(group);
+    		objOutStream.writeObject(MessageFlags.END_MESSAGE);
+    		result = (String)objInStream.readObject();
+    	} catch(IOException | ClassNotFoundException e) {
+    		e.printStackTrace();
+    	}
+    	
+		closeConnection(socket, objInStream, objOutStream);
+		return result;
    }
 
-    private static Message sendReceive(Message message) {
-    
-    }
-    
-    private static Message Marshalling(int contentType, int operation, String name, String password, String server, ArrayList<Object> objs) {
-    
-    }
-
-    
     private static void startConnection(String localUser, String password, String serverAddress) {
     	String[] aux = serverAddress.split(":");
     
