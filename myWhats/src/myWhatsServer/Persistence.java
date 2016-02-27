@@ -36,7 +36,23 @@ public class Persistence {
 	}
 	
 	/*
-	 * Returna true se bem sucedido, false caso ocorra erro
+	 * Retorna :
+	 * -1 - se utilizador e password não coincidem
+	 *  0 - Se utilizador existe e e a password coincide
+	 *  1- Se utilizador não existe e foi criado com sucesso
+	 */
+	public int verifyUser(String username, String password){
+		User u = users.get(username);
+		if(u == null){
+			u = new User(username, password);
+			users.put(username, u);
+			return 1;
+		}		
+		return u.getPassword().equals(password) ? 0 : -1;
+	}
+	
+	/*
+	 * Retorna true se bem sucedido, false caso ocorra erro
 	 */
 	public boolean saveMessage(String username, Calendar timestamp, String message){
 		String filename = timestamp.toString();
