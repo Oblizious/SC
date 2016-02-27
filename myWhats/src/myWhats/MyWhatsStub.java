@@ -1,5 +1,7 @@
 package myWhats;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,8 +10,8 @@ import java.net.Socket;
 public class MyWhatsStub {
 	
 	private static Socket socket = null;
-	private static ObjectInputStream in = null;
-	private static ObjectOutputStream out = null;
+	private static ObjectInputStream objInStream = null;
+	private static ObjectOutputStream objOutStream = null;
 	private static String result = null;
 	
 	public static String createUser(String localUser, String password, String serverAddress){
@@ -17,13 +19,13 @@ public class MyWhatsStub {
 		
 		try {
 			login(localUser, password);
-			out.writeObject(Constants.END_MESSAGE);
-			result = (String)in.readObject();
+			objOutStream.writeObject(Constants.END_MESSAGE);
+			result = (String)objInStream.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		
-		closeConnection(socket, in, out);
+		closeConnection(socket, objInStream, objOutStream);
 		return result;
     }
     
@@ -32,44 +34,55 @@ public class MyWhatsStub {
     
     	try {
     		login(localUser, password);
-    		out.writeObject(Constants.M_MESSAGE);
-    		out.writeObject(contact);
-    		out.writeObject(text);
-    		out.writeObject(Constants.END_MESSAGE);
-    		result = (String)in.readObject();
+    		objOutStream.writeObject(Constants.M_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(text);
+    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
     	}
     	
-		closeConnection(socket, in, out);
+		closeConnection(socket, objInStream, objOutStream);
 		return result;
     }
     
     public static String sendFile(String localUser, String password, String serverAddress, String contact, String filename) {
     	startConnection(localUser, password, serverAddress);
-        
+    	File file = new File(filename);
+    	
     	try {
     		login(localUser, password);
-    		out.writeObject(Constants.M_MESSAGE);
-    		out.writeObject(contact);
-    		out.writeObject(text);
-    		out.writeObject(Constants.END_MESSAGE);
-    		result = (String)in.readObject();
+    		objOutStream.writeObject(Constants.F_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(file);
+    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
     	}
     	
-		closeConnection(socket, in, out);
+		closeConnection(socket, objInStream, objOutStream);
 		return result;
     }
     
-    public static boolean enviarMensagem(String nome, String password, String server, String contacto, String messagem) {
-
-
-    }
-
-    public static String comunicacoesMaisRecentes(String nome, String password, String server) {
-    
+    public static String mostRecent(String nome, String password, String server) {
+    	startConnection(localUser, password, serverAddress);
+    	File file = new File(filename);
+    	
+    	try {
+    		login(localUser, password);
+    		objOutStream.writeObject(Constants.F_MESSAGE);
+    		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(file);
+    		objOutStream.writeObject(Constants.END_MESSAGE);
+    		result = (String)objInStream.readObject();
+    	} catch(IOException | ClassNotFoundException e) {
+    		e.printStackTrace();
+    	}
+    	
+		closeConnection(socket, objInStream, objOutStream);
+		return result;
     }
 
     public static String todasComunicacoes(String nome, String password, String server, String contacto) {
@@ -102,17 +115,17 @@ public class MyWhatsStub {
     
 		try {
 			socket = new Socket(aux[0], Integer.parseInt(aux[1]));
-			in = new ObjectInputStream(socket.getInputStream());
-			out = new ObjectOutputStream(socket.getOutputStream());
+			objInStream = new ObjectInputStream(socket.getInputStream());
+			objOutStream = new ObjectOutputStream(socket.getOutputStream());
+			
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
-
     }
 
     private static void login(String localUser, String password) throws IOException {
-		out.writeObject(localUser);
-		out.writeObject(password);
+		objOutStream.writeObject(localUser);
+		objOutStream.writeObject(password);
     }
     
 	private static void closeConnection(Socket socket, ObjectInputStream in, ObjectOutputStream out) {
