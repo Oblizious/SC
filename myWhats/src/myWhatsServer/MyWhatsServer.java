@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import Resources.MessageFlags;
+
 public class MyWhatsServer {
 	
 	public static void main(String[] args) {
@@ -68,23 +70,37 @@ public class MyWhatsServer {
 						user = (String)inStream.readObject();
 						passwd = (String)inStream.readObject();
 						System.out.println("thread: depois de receber a password e o user");
-					}catch (ClassNotFoundException e1) {
+					
+						//TODO ciclo de fazer actual shit
+						int result = Persistence.getInstance().verifyUser(user, passwd);
+						
+						if(result != -1){ 
+							// cliente foi autenticado ou criado
+							System.out.println("cool story bro, u autentic");
+							selectedOperation(inStream, outStream, result);
+						}
+						else 
+							outStream.writeObject("Failed!!!!!!"); //TODO
+						
+						
+						
+						
+					
+					
+					}catch (ClassNotFoundException | IOException e1) {
 						e1.printStackTrace();
 					}
 					
-					//TODO ciclo de fazer actual shit
-					if(Persistence.getInstance().verifyUser(user, passwd) != -1){ 
-						// cliente foi autenticado ou criado
-						System.out.println("cool story bro, u autentic");						
-					}
+
 					
+					/*
 					if (user.length() != 0){
 						outStream.writeObject(new Boolean(true));
 					}
 					else {
 						outStream.writeObject(new Boolean(false));
 					}
-
+					*/
 					outStream.close();
 					inStream.close();
 	 			
@@ -94,5 +110,53 @@ public class MyWhatsServer {
 					e.printStackTrace();
 				}
 			}
+			
+			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream, int result) throws ClassNotFoundException, IOException {
+				
+				MessageFlags type = (MessageFlags)inStream.readObject();
+				
+				switch(type) {
+				
+					case END_MESSAGE:
+						if(result == 0)
+							outStream.writeObject("Logged");
+						else if(result == 1)
+							outStream.writeObject("User Created");
+						break;
+						
+					case M_MESSAGE:
+						String contact = (String) inStream.readObject();
+						String text = (String) inStream.readObject();
+						MessageFlags end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							String result = saveMessage(contact, text);
+							outStream.writeObject(result);
+						}
+						else
+							outStream.writeObject("Error");
+						break;
+						
+					case F_MESSAGE:
+						
+						break;
+						
+					case R_MESSAGE:
+						
+						break;
+						
+					case A_MESSAGE:
+						
+						break;
+						
+					case D_MESSAGE:
+						
+						break;
+				
+				}
+				
+			}
+			
+			
+			
 		}
 }
