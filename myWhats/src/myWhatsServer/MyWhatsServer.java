@@ -1,5 +1,6 @@
 package myWhatsServer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -77,7 +78,7 @@ public class MyWhatsServer {
 						if(result != -1){ 
 							// cliente foi autenticado ou criado
 							System.out.println("cool story bro, u autentic");
-							selectedOperation(inStream, outStream, result);
+							selectedOperation(inStream, outStream, result, user);
 						}
 						else 
 							outStream.writeObject("Failed!!!!!!"); //TODO
@@ -111,9 +112,13 @@ public class MyWhatsServer {
 				}
 			}
 			
-			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream, int result) throws ClassNotFoundException, IOException {
+			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream, int result, String user) throws ClassNotFoundException, IOException {
 				
 				MessageFlags type = (MessageFlags)inStream.readObject();
+				String contact;
+				MessageFlags end;
+				String group;
+				String answer;
 				
 				switch(type) {
 				
@@ -125,35 +130,118 @@ public class MyWhatsServer {
 						break;
 						
 					case M_MESSAGE:
-						String contact = (String) inStream.readObject();
+						contact = (String) inStream.readObject();
 						String text = (String) inStream.readObject();
-						MessageFlags end = (MessageFlags) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
 						if(end.equals(MessageFlags.END_MESSAGE)) {
-							String result = saveMessage(contact, text);
-							outStream.writeObject(result);
+							answer = saveMessage(user, contact, text);
+							outStream.writeObject(answer);
 						}
 						else
 							outStream.writeObject("Error");
 						break;
 						
 					case F_MESSAGE:
-						
+						contact = (String) inStream.readObject();
+						File file = (File) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							answer = saveFile(user, contact, file);
+							outStream.writeObject(answer);
+						}
+						else
+							outStream.writeObject("Error");
 						break;
 						
-					case R_MESSAGE:
+					case R0_MESSAGE:
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							answer = getMostRecentCommunications(user);
+							outStream.writeObject(answer);
+						}
+						else
+							outStream.writeObject("Error");
+						break;
 						
+					case R1_MESSAGE:
+						contact = (String) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							answer = getAllContactCommunications(user, contact);
+							outStream.writeObject(answer);
+						}
+						else
+							outStream.writeObject("Error");
+						break;
+						
+					case R2_MESSAGE:
+						contact = (String) inStream.readObject();
+						String filename = (String) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							File fileAnswer = getContactFile(user, contact, filename);
+							outStream.writeObject(fileAnswer);
+						}
+						else
+							outStream.writeObject("Error");
 						break;
 						
 					case A_MESSAGE:
+						contact = (String) inStream.readObject();
+						group = (String) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							answer = addToGroup(user, contact, group);
+							outStream.writeObject(answer);
+						}
+						else
+							outStream.writeObject("Error");
 						
 						break;
 						
 					case D_MESSAGE:
-						
+						contact = (String) inStream.readObject();
+						group = (String) inStream.readObject();
+						end = (MessageFlags) inStream.readObject();
+						if(end.equals(MessageFlags.END_MESSAGE)) {
+							answer = removeFromGroup(user, contact, group);
+							outStream.writeObject(result);
+						}
+						else
+							outStream.writeObject("Error");
 						break;
 				
 				}
 				
+			}
+			
+			
+			private String saveMessage(String user, String contact, String text) {
+				return null;
+			}
+			
+			private String saveFile(String user, String contact, File file) {
+				return null;
+			}
+			
+			private String getMostRecentCommunications(String user) {
+				return null;
+			}
+			
+			private String getAllContactCommunications(String user, String contact) {
+				return null;
+			}
+			
+			private File getContactFile(String user, String contact, String filename) {
+				return null;
+			}
+			
+			private String addToGroup(String user, String contact, String group) {
+				return null;
+			}
+			
+			private String removeFromGroup(String user, String contact, String group) {
+				return null;
 			}
 			
 			

@@ -72,7 +72,7 @@ public class MyWhatsStub {
     	
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.R0_MESSAGE);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {
@@ -88,7 +88,7 @@ public class MyWhatsStub {
     	
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.R1_MESSAGE);
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
@@ -106,7 +106,7 @@ public class MyWhatsStub {
     	
     	try {
     		login(localUser, password);
-    		objOutStream.writeObject(MessageFlags.R_MESSAGE);
+    		objOutStream.writeObject(MessageFlags.R2_MESSAGE);
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(filename);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
