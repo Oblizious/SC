@@ -1,6 +1,7 @@
 package myWhats;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -50,19 +51,36 @@ public class MyWhatsStub {
     
     public static String sendFile(String localUser, String password, String serverAddress, String contact, String filename) {
     	startConnection(localUser, password, serverAddress);
-    	File file = new File(filename);
+    	
+    	File file = new File("Client/" + filename);
+    	FileInputStream fileInStream;
+    	byte[] buff = new byte[1024];
+    	int readAmount = 1024;
+    	long fileSize = file.length();
+    	System.out.println(fileSize);
+    	
     	
     	try {
     		login(localUser, password);
     		objOutStream.writeObject(MessageFlags.F_MESSAGE);
     		objOutStream.writeObject(contact);
+    		objOutStream.writeObject(filename);
+    		objOutStream.writeObject(fileSize);
     		
+    		fileInStream = new FileInputStream(file);
     		
+    		if(fileInStream.available() < 1024)
+    			readAmount = fileInStream.available();
     		
+    		while(fileInStream.read(buff, 0, readAmount) != -1 && fileInStream.available() != 0) {
+    			System.out.println(fileInStream .available());
+    			objOutStream.writeObject(buff);
+        		if(fileInStream.available() < 1024)
+        			readAmount = fileInStream.available();
+        		else
+        			readAmount = 1024;
+    		}
     		
-    		
-    		
-    		objOutStream.writeObject(file);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
     	} catch(IOException | ClassNotFoundException e) {

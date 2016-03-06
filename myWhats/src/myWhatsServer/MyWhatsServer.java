@@ -1,6 +1,8 @@
 package myWhatsServer;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -89,6 +91,7 @@ public class MyWhatsServer {
 				MessageFlags end;
 				String group;
 				String answer;
+				String filename;
 				
 				String user = (String)inStream.readObject();
 				String passwd = (String)inStream.readObject();
@@ -123,11 +126,30 @@ public class MyWhatsServer {
 						
 						case F_MESSAGE:
 							contact = (String) inStream.readObject();
-							File file = (File) inStream.readObject();
+							filename = (String) inStream.readObject();
+							long fileSize = (long) inStream.readObject();
+							long alreadyRead = 0;
+							
+							File file = new File(filename);
+							FileOutputStream fileOutStream = new FileOutputStream(file);
+							byte[] buffer;
+							
+							System.out.println(fileSize);
+							
+							
+							while(fileSize != alreadyRead) {
+								buffer = (byte[]) inStream.readObject();
+								fileOutStream.write(buffer);
+								System.out.println("buffer " +  buffer.length);
+								System.out.println("al " + alreadyRead);
+								alreadyRead += buffer.length;
+							}
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = saveFile(user, contact, file);
-								outStream.writeObject(answer);
+								
+	
+								//answer = saveFile(user, contact, file);
+								outStream.writeObject("dadaadad");
 							}
 							else
 								outStream.writeObject("Error");
@@ -156,7 +178,7 @@ public class MyWhatsServer {
 						
 						case R2_MESSAGE:
 							contact = (String) inStream.readObject();
-							String filename = (String) inStream.readObject();
+							filename = (String) inStream.readObject();
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {
 								File fileAnswer = getContactFile(user, contact, filename);
@@ -204,6 +226,9 @@ public class MyWhatsServer {
 			}
 			
 			private String saveFile(String user, String contact, File file) {
+				
+				
+				
 				return null;
 			}
 			
