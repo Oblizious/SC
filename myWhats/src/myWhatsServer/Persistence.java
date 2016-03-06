@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,9 @@ public class Persistence {
 	private static final Persistence INSTANCE = new Persistence();
 	private File usersFile;
 	private Map<String,User> users;
+	private DateFormat timestampFormat;
+	private DateFormat filenameFormat;
+	private Date date;
 	
 	private Persistence() {		
 		try {
@@ -21,6 +26,9 @@ public class Persistence {
 			usersFile.getParentFile().mkdirs();//cria caminho
 			usersFile.createNewFile();//cria ficheiro se este nao existe
 			users = new HashMap<>();
+			timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			filenameFormat = new SimpleDateFormat("yyyy-MM-dd HH mm ss SSS");
+			date = new Date();
 			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));
 			
@@ -74,15 +82,29 @@ public class Persistence {
 	/*
 	 * Retorna true se bem sucedido, false caso ocorra erro
 	 */
-	public synchronized boolean saveMessage(String username, String message){
-		String timestamp = Calendar.getInstance().toString();
-		File f = new File("./Data/username/" + timestamp);
+	public synchronized boolean saveMessage(String username, String contact, String message){
+		if(users.get(contact) == null) 
+			return false;
+		
+		String timestamp = timestampFormat.format(date).toString();
+		String filename = filenameFormat.format(date).toString();
+		
+		File file1 = new File("./Data/" + username + "/" + filename);
+		File file2 = new File("./Data/" + contact + "/" + filename);
 		
 		try {
-			BufferedWriter w = new BufferedWriter(new FileWriter(f));
-			w.write(message + "\n");
+			BufferedWriter w = new BufferedWriter(new FileWriter(file1));
+			w.write("Contact: " + contact + "\n");
+			w.write("me: " + message + "\n");
 			w.write(timestamp.toString());
 			w.close();
+			
+			w  = new BufferedWriter(new FileWriter(file2));
+			w.write("Contact: " + username + "\n");
+			w.write(username + ": " + message + "\n");
+			w.write(timestamp.toString());
+			w.close();
+			
 		} catch (IOException e) {e.printStackTrace(); return false;}
 		
 		return true;

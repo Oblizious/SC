@@ -56,6 +56,12 @@ public class MyWhatsStub {
     		login(localUser, password);
     		objOutStream.writeObject(MessageFlags.F_MESSAGE);
     		objOutStream.writeObject(contact);
+    		
+    		
+    		
+    		
+    		
+    		
     		objOutStream.writeObject(file);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();

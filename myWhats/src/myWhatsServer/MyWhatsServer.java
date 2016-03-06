@@ -31,22 +31,26 @@ public class MyWhatsServer {
 			sSoc = new ServerSocket(porto);
 			
 			while(true) {
-			try {
-				Socket inSoc = sSoc.accept();
-				ServerThread newServerThread = new ServerThread(inSoc);
-				newServerThread.start();
-		    }
-		    catch (IOException e) {
-		        e.printStackTrace();
-		    }
-			
-		    sSoc.close();
-		}
+				try {
+					System.out.println("Waiting connection");
+					Socket inSoc = sSoc.accept();
+					System.out.println("New connection");
+					ServerThread newServerThread = new ServerThread(inSoc);
+					newServerThread.start();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			//??????????????????????????
+			//sSoc.close();
 			
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
+		
+		
 	}
 	
 	//Threads utilizadas para comunicao com os clientes
@@ -63,45 +67,12 @@ public class MyWhatsServer {
 				try {
 					ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 					ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-
-					String user = null;
-					String passwd = null;
-				
+			
 					try {
-						user = (String)inStream.readObject();
-						passwd = (String)inStream.readObject();
-						System.out.println("thread: depois de receber a password e o user");
-					
-						//TODO ciclo de fazer actual shit
-						int result = Persistence.getInstance().verifyUser(user, passwd);
-						
-						if(result != -1){ 
-							// cliente foi autenticado ou criado
-							System.out.println("cool story bro, u autentic");
-							selectedOperation(inStream, outStream, result, user);
-						}
-						else 
-							outStream.writeObject("Failed!!!!!!"); //TODO
-						
-						
-						
-						
-					
-					
+							selectedOperation(inStream, outStream);
 					}catch (ClassNotFoundException | IOException e1) {
 						e1.printStackTrace();
 					}
-					
-
-					
-					/*
-					if (user.length() != 0){
-						outStream.writeObject(new Boolean(true));
-					}
-					else {
-						outStream.writeObject(new Boolean(false));
-					}
-					*/
 					outStream.close();
 					inStream.close();
 	 			
@@ -112,112 +83,124 @@ public class MyWhatsServer {
 				}
 			}
 			
-			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream, int result, String user) throws ClassNotFoundException, IOException {
+			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream) throws ClassNotFoundException, IOException {
 				
-				MessageFlags type = (MessageFlags)inStream.readObject();
 				String contact;
 				MessageFlags end;
 				String group;
 				String answer;
 				
-				switch(type) {
+				String user = (String)inStream.readObject();
+				String passwd = (String)inStream.readObject();
 				
-					case END_MESSAGE:
-						if(result == 0)
-							outStream.writeObject("Logged");
-						else if(result == 1)
-							outStream.writeObject("User Created");
-						break;
-						
-					case M_MESSAGE:
-						contact = (String) inStream.readObject();
-						String text = (String) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = saveMessage(user, contact, text);
-							outStream.writeObject(answer);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
-						
-					case F_MESSAGE:
-						contact = (String) inStream.readObject();
-						File file = (File) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = saveFile(user, contact, file);
-							outStream.writeObject(answer);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
-						
-					case R0_MESSAGE:
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = getMostRecentCommunications(user);
-							outStream.writeObject(answer);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
-						
-					case R1_MESSAGE:
-						contact = (String) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = getAllContactCommunications(user, contact);
-							outStream.writeObject(answer);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
-						
-					case R2_MESSAGE:
-						contact = (String) inStream.readObject();
-						String filename = (String) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							File fileAnswer = getContactFile(user, contact, filename);
-							outStream.writeObject(fileAnswer);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
-						
-					case A_MESSAGE:
-						contact = (String) inStream.readObject();
-						group = (String) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = addToGroup(user, contact, group);
-							outStream.writeObject(answer);
-						}
-						else
-							outStream.writeObject("Error");
-						
-						break;
-						
-					case D_MESSAGE:
-						contact = (String) inStream.readObject();
-						group = (String) inStream.readObject();
-						end = (MessageFlags) inStream.readObject();
-						if(end.equals(MessageFlags.END_MESSAGE)) {
-							answer = removeFromGroup(user, contact, group);
-							outStream.writeObject(result);
-						}
-						else
-							outStream.writeObject("Error");
-						break;
+				int result = Persistence.getInstance().verifyUser(user, passwd);
+			
+				MessageFlags type = (MessageFlags)inStream.readObject();
 				
+				if(result == -1)
+					outStream.writeObject("Failed!!");
+				else {
+					switch(type) {
+				
+						case END_MESSAGE:
+							if(result == 0)
+								outStream.writeObject("Logged");
+							else if(result == 1)
+								outStream.writeObject("User Created");
+							break;
+						
+						case M_MESSAGE:
+							contact = (String) inStream.readObject();
+							String text = (String) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = saveMessage(user, contact, text);
+								outStream.writeObject(answer);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+						
+						case F_MESSAGE:
+							contact = (String) inStream.readObject();
+							File file = (File) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = saveFile(user, contact, file);
+								outStream.writeObject(answer);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+						
+						case R0_MESSAGE:
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = getMostRecentCommunications(user);
+								outStream.writeObject(answer);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+						
+						case R1_MESSAGE:
+							contact = (String) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = getAllContactCommunications(user, contact);
+								outStream.writeObject(answer);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+						
+						case R2_MESSAGE:
+							contact = (String) inStream.readObject();
+							String filename = (String) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								File fileAnswer = getContactFile(user, contact, filename);
+								outStream.writeObject(fileAnswer);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+						
+						case A_MESSAGE:
+							contact = (String) inStream.readObject();
+							group = (String) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = addToGroup(user, contact, group);
+								outStream.writeObject(answer);
+							}
+							else
+								outStream.writeObject("Error");
+						
+							break;
+						
+						case D_MESSAGE:
+							contact = (String) inStream.readObject();
+							group = (String) inStream.readObject();
+							end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE)) {
+								answer = removeFromGroup(user, contact, group);
+								outStream.writeObject(result);
+							}
+							else
+								outStream.writeObject("Error");
+							break;
+				
+					}	
 				}
-				
 			}
 			
-			
-			private String saveMessage(String user, String contact, String text) {
-				return null;
+			private String saveMessage(String username, String contact, String message) {
+				boolean result = Persistence.getInstance().saveMessage(username, contact, message);
+				if(result)
+					return "Messagem guardada com sucesso!";
+				else
+					return "Erro!";
 			}
 			
 			private String saveFile(String user, String contact, File file) {

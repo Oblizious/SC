@@ -62,6 +62,10 @@ public class MyWhats {
                     break;
             }
         }
+        else {
+            String result = createUser(args[0], password, args[1]);
+            System.out.println(result);                 
+        }
     }    
     
     private static String pedirPassword(){
