@@ -146,7 +146,7 @@ public class MyWhatsServer {
                             
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = saveFile(contact, file, filename);
+								answer = saveFile(user, contact, file, filename);
 								outStream.writeObject(answer);
 							}
 							else
@@ -223,8 +223,8 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 			
-			private String saveFile(String contact, File file, String filename) {
-				boolean result = Persistence.getInstance().saveFile(contact, file,filename);
+			private String saveFile(String username, String contact, File file, String filename) {
+				boolean result = Persistence.getInstance().saveFile(username, contact, file,filename);
 				if(result)
 					return "Ficheiro guardado com sucesso!";
 				else

@@ -93,8 +93,10 @@ public class Persistence {
 		String timestamp = timestampFormat.format(date).toString();
 		String filename = filenameFormat.format(date).toString();
 		
-		File file1 = new File("./Data/" + username + "/" + filename);
-		File file2 = new File("./Data/" + contact + "/" + filename);
+		File file1 = new File("./Data/" + username + "/" + contact + "/" + filename);
+		file1.getParentFile().mkdirs();
+		File file2 = new File("./Data/" + contact + "/" + username + "/" + filename);
+		file2.getParentFile().mkdirs();
 		
 		try {
 			BufferedWriter w = new BufferedWriter(new FileWriter(file1));
@@ -129,7 +131,7 @@ public class Persistence {
         return INSTANCE;
     }	
 	
-	public synchronized boolean saveFile(String contact, File file, String filename){
+	public synchronized boolean saveFile(String username, String contact, File file, String filename){
 		if(users.get(contact) == null) {
 			file.delete();
 			return false;	
@@ -137,7 +139,7 @@ public class Persistence {
 		
 		try {
 			
-			File result = new File("Data/" + contact + "/" + filename);
+			File result = new File("Data/" + contact + "/" + username + "/" + filename);
 			result.getParentFile().mkdirs();	
 			
 			InputStream inStream = new FileInputStream(file);
