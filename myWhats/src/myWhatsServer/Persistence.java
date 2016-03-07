@@ -11,13 +11,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Persistence {
@@ -225,6 +222,50 @@ public class Persistence {
 		}
 		
 		return sb.toString();
+	}
+	
+	public String getAllContactCommunications(String username, String contact) {
+		if(users.get(contact) == null) {
+			return null;	
+		}
+		
+		File dir = new File("Data/" + username + "/" + contact);
+		
+		File[] files = dir.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File file) {
+				return file.isFile();
+			}
+			
+		});
+		StringBuilder sb = new StringBuilder();
+		for(File file : files) {
+			try {
+				BufferedReader br = new  BufferedReader (new FileReader(file));
+				String s;
+				while((s = br.readLine()) != null)
+					sb.append(s + "\n");
+				
+				sb.append("\n");
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public File getContactFile(String username, String contact, String filename) {
+		if(users.get(contact) == null)
+			return null;
+		
+		File file = new File("Data/" + contact + "/" + username + "/" + filename);
+		if(!file.exists())
+			return null;
+		
+		return file;
 	}
 	
 }

@@ -2,6 +2,7 @@ package myWhats;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -116,9 +117,8 @@ public class MyWhatsStub {
 		return result;
     }
     
-    public static File getContactFile(String localUser, String password, String serverAddress, String contact, String filename) {
+    public static String getContactFile(String localUser, String password, String serverAddress, String contact, String filename) {
     	startConnection(localUser, password, serverAddress);
-    	File file = null;
     	
     	try {
     		login(localUser, password);
@@ -126,13 +126,31 @@ public class MyWhatsStub {
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(filename);
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
-    		file = (File)objInStream.readObject();
+    		
+			long fileSize = (long) objInStream.readObject();
+			long alreadyRead = 0;
+			
+			File file = new File(filename);
+			FileOutputStream fileOutStream = new FileOutputStream(file);
+			byte[] buffer = new byte[1024];
+			
+			System.out.println(fileSize);
+			
+            while(alreadyRead < fileSize) {
+                int size = objInStream.read(buffer);
+                System.out.println(size);
+                fileOutStream.write(buffer, 0, size);
+                alreadyRead += size;
+            }
+            
+            fileOutStream.close();
+    		
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
     	}
     	
 		closeConnection(socket, objInStream, objOutStream);
-		return file;
+		return "File ok";
     }
     
     public static String addToGroup(String localUser, String password, String serverAddress, String contact, String group) {

@@ -1,6 +1,7 @@
 package myWhatsServer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -181,7 +182,21 @@ public class MyWhatsServer {
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {
 								File fileAnswer = getContactFile(user, contact, filename);
-								outStream.writeObject(fileAnswer);
+								
+						    	byte[] buff = new byte[1024];
+						    	long fileAnswerSize = fileAnswer.length();
+					    		
+					    		outStream.writeObject(fileAnswerSize);
+						    	
+						    	FileInputStream  fileInStream = new FileInputStream(fileAnswer);
+					    		int readSize;
+					    		
+					            while( (readSize = fileInStream.read(buff, 0, 1024)) != -1) {
+					            	outStream.write(buff,0,readSize);
+					            }
+					    		fileInStream.close();
+								
+								
 							}
 							else
 								outStream.writeObject("Error");
@@ -236,12 +251,16 @@ public class MyWhatsServer {
 				return Persistence.getInstance().getMostRecentCommunications(username);
 			}
 			
-			private String getAllContactCommunications(String user, String contact) {
-				return null;
+			private String getAllContactCommunications(String username, String contact) {
+				String result =  Persistence.getInstance().getAllContactCommunications(username, contact);
+				if(result == null)
+					return "Erro!";
+				else
+					return result;
 			}
 			
-			private File getContactFile(String user, String contact, String filename) {
-				return null;
+			private File getContactFile(String username, String contact, String filename) {
+				return Persistence.getInstance().getContactFile(username, contact, filename);
 			}
 			
 			private String addToGroup(String user, String contact, String group) {
