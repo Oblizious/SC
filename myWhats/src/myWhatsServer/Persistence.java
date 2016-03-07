@@ -171,7 +171,7 @@ public class Persistence {
 		return false;
 	}
 	
-	private synchronized File mostRecentFile(File contactDir) {
+	private synchronized File getMostRecentFile(File contactDir) {
 
 		File[] files = contactDir.listFiles(new FileFilter() {
 
@@ -197,7 +197,7 @@ public class Persistence {
 	
 	public synchronized String getMostRecentCommunications(String username) {
 		
-		File dir = new File(username);
+		File dir = new File("Data/" + username);
 		
 		File[] dirs = dir.listFiles(new FileFilter() {
 
@@ -209,14 +209,16 @@ public class Persistence {
 		});
 		StringBuilder sb = new StringBuilder();
 		for(File d : dirs) {
-			File mostRecent = mostRecentFile(d);
+			File mostRecent = getMostRecentFile(d);
 			
 			try {
-				List<String> aux = Files.readAllLines(mostRecent.toPath());
-				for(String s : aux) {
-					sb.append(s + "\n");	
-				}
-				sb.append("\n");	
+				BufferedReader br = new  BufferedReader (new FileReader(mostRecent));
+				String s;
+				while((s = br.readLine()) != null)
+					sb.append(s + "\n");
+				
+				sb.append("\n");
+				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
