@@ -129,8 +129,14 @@ public class Persistence {
         return INSTANCE;
     }	
 	
-	private synchronized boolean saveFile(File file, String contact, String filename){
+	public synchronized boolean saveFile(String contact, File file, String filename){
+		if(users.get(contact) == null) {
+			file.delete();
+			return false;	
+		}
+		
 		try {
+			
 			File result = new File("Data/" + contact + "/" + filename);
 			result.getParentFile().mkdirs();	
 			
