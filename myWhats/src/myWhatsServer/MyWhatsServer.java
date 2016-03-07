@@ -1,7 +1,6 @@
 package myWhatsServer;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -136,11 +135,14 @@ public class MyWhatsServer {
 							
 							System.out.println(fileSize);
 							
-                            while(alreadyRead <= fileSize) {
+                            while(alreadyRead < fileSize) {
                                 int size = inStream.read(buffer);
+                                System.out.println(size);
                                 fileOutStream.write(buffer, 0, size);
                                 alreadyRead += size;
                             }
+                            
+                            fileOutStream.close();
                             
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {

@@ -55,10 +55,7 @@ public class MyWhatsStub {
     	File file = new File("Client/" + filename);
     	FileInputStream fileInStream;
     	byte[] buff = new byte[1024];
-    	int readAmount = 1024;
     	long fileSize = file.length();
-    	System.out.println(fileSize);
-    	
     	
     	try {
     		login(localUser, password);
@@ -68,19 +65,13 @@ public class MyWhatsStub {
     		objOutStream.writeObject(fileSize);
     		
     		fileInStream = new FileInputStream(file);
+    		int readSize;
     		
- 
-    		if(fileInStream.available() < 1024)
-    			readAmount = fileInStream.available();
-    		
-    		while(fileInStream.read(buff, 0, readAmount) != -1 && fileInStream.available() != 0) {
-    			System.out.println(fileInStream.available());
-    			objOutStream.write(buff);
-        		if(fileInStream.available() < 1024)
-        			readAmount = fileInStream.available();
-        		else
-        			readAmount = 1024;
-    		}
+            while( (readSize = fileInStream.read(buff, 0, 1024)) != -1) {
+            	System.out.println(readSize);
+                objOutStream.write(buff,0,readSize);
+            }
+    		fileInStream.close();
     		
     		objOutStream.writeObject(MessageFlags.END_MESSAGE);
     		result = (String)objInStream.readObject();
