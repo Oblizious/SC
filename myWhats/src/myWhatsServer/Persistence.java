@@ -3,6 +3,7 @@ package myWhatsServer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -10,19 +11,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Persistence {
 	private static final Persistence INSTANCE = new Persistence();
+	private final DateFormat TIMESTAMPFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private final DateFormat FILENAMEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH mm ss SSS");
 	private File usersFile;
 	private Map<String,User> users;
-	private DateFormat timestampFormat;
-	private DateFormat filenameFormat;
-	private Date date;
 	
 	private Persistence() {		
 		try {
@@ -30,9 +33,8 @@ public class Persistence {
 			usersFile.getParentFile().mkdirs();//cria caminho
 			usersFile.createNewFile();//cria ficheiro se este nao existe
 			users = new HashMap<>();
-			timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			filenameFormat = new SimpleDateFormat("yyyy-MM-dd HH mm ss SSS");
-			date = new Date();
+			
+		
 			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));
 			
@@ -90,8 +92,10 @@ public class Persistence {
 		if(users.get(contact) == null) 
 			return false;
 		
-		String timestamp = timestampFormat.format(date).toString();
-		String filename = filenameFormat.format(date).toString();
+		Date date = new Date();
+		
+		String timestamp = TIMESTAMPFORMAT.format(date).toString();
+		String filename = FILENAMEFORMAT.format(date).toString();
 		
 		File file1 = new File("./Data/" + username + "/" + contact + "/" + filename);
 		file1.getParentFile().mkdirs();
@@ -165,6 +169,60 @@ public class Persistence {
 		}
 		
 		return false;
+	}
+	
+	private synchronized File mostRecentFile(File contactDir) {
+
+		File[] files = contactDir.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File file) {
+				return file.isFile();
+			}
+			
+		});
+		
+		long modifiedTime = 0;
+		File mostRecent = null;
+		
+		for(File file : files) {
+			if(file.lastModified() > modifiedTime) {
+				mostRecent = file;
+				modifiedTime = file.lastModified();
+			}
+		}
+		
+		return mostRecent;
+	}
+	
+	public synchronized String getMostRecentCommunications(String username) {
+		
+		File dir = new File(username);
+		
+		File[] dirs = dir.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File d) {
+				return d.isDirectory();
+			}
+			
+		});
+		StringBuilder sb = new StringBuilder();
+		for(File d : dirs) {
+			File mostRecent = mostRecentFile(d);
+			
+			try {
+				List<String> aux = Files.readAllLines(mostRecent.toPath());
+				for(String s : aux) {
+					sb.append(s + "\n");	
+				}
+				sb.append("\n");	
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return sb.toString();
 	}
 	
 }

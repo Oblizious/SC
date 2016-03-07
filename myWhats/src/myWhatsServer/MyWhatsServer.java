@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import Resources.MessageFlags;
 
@@ -231,8 +232,8 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 			
-			private String getMostRecentCommunications(String user) {
-				return null;
+			private String getMostRecentCommunications(String username) {
+				return Persistence.getInstance().getMostRecentCommunications(username);
 			}
 			
 			private String getAllContactCommunications(String user, String contact) {

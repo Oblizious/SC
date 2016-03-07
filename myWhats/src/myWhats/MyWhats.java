@@ -45,11 +45,11 @@ public class MyWhats {
                     break;
                  
                 case "-r":
-                    if(args.length == index)
+                    if(args.length == index + 1)
                     	System.out.println(getMostRecentCommunications(args[0], password, args[1]));
-                    else if(args.length == index + 1)
-                    	System.out.println(getAllContactCommunications(args[0], password, args[1], args[index + 1]));
                     else if(args.length == index + 2)
+                    	System.out.println(getAllContactCommunications(args[0], password, args[1], args[index + 1]));
+                    else if(args.length == index + 3)
                     	System.out.println(getContactFile(args[0], password, args[1], args[index + 1], args[index + 2]));
                     break;
                 
