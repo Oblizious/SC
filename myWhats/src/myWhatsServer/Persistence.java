@@ -3,9 +3,13 @@ package myWhatsServer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -124,4 +128,35 @@ public class Persistence {
 	public static Persistence getInstance() {
         return INSTANCE;
     }	
+	
+	private synchronized boolean saveFile(File file, String contact, String filename){
+		try {
+			File result = new File("Data/" + contact + "/" + filename);
+			result.getParentFile().mkdirs();	
+			
+			InputStream inStream = new FileInputStream(file);
+			OutputStream outStream = new FileOutputStream(result);
+
+			byte[] buffer = new byte[1024];
+
+			int length;
+			while ((length = inStream.read(buffer)) > 0) {
+
+				outStream.write(buffer, 0, length);
+
+			}
+
+			inStream.close();
+			outStream.close();
+			
+			file.delete();
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+	
 }
