@@ -69,12 +69,13 @@ public class MyWhatsStub {
     		
     		fileInStream = new FileInputStream(file);
     		
+ 
     		if(fileInStream.available() < 1024)
     			readAmount = fileInStream.available();
     		
     		while(fileInStream.read(buff, 0, readAmount) != -1 && fileInStream.available() != 0) {
-    			System.out.println(fileInStream .available());
-    			objOutStream.writeObject(buff);
+    			System.out.println(fileInStream.available());
+    			objOutStream.write(buff);
         		if(fileInStream.available() < 1024)
         			readAmount = fileInStream.available();
         		else

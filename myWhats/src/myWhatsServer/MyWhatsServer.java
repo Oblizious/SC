@@ -132,18 +132,16 @@ public class MyWhatsServer {
 							
 							File file = new File(filename);
 							FileOutputStream fileOutStream = new FileOutputStream(file);
-							byte[] buffer;
+							byte[] buffer = new byte[1024];
 							
 							System.out.println(fileSize);
 							
-							
-							while(fileSize != alreadyRead) {
-								buffer = (byte[]) inStream.readObject();
-								fileOutStream.write(buffer);
-								System.out.println("buffer " +  buffer.length);
-								System.out.println("al " + alreadyRead);
-								alreadyRead += buffer.length;
-							}
+                            while(alreadyRead <= fileSize) {
+                                int size = inStream.read(buffer);
+                                fileOutStream.write(buffer, 0, size);
+                                alreadyRead += size;
+                            }
+                            
 							end = (MessageFlags) inStream.readObject();
 							if(end.equals(MessageFlags.END_MESSAGE)) {
 								
