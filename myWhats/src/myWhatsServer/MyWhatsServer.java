@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import Resources.MessageFlags;
 
@@ -43,14 +42,12 @@ public class MyWhatsServer {
 				}
 				catch (IOException e) {
 					e.printStackTrace();
+					sSoc.close();
 				}
 			}
-			//??????????????????????????
-			//sSoc.close();
 			
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
-			System.exit(-1);
 		}
 		
 		
