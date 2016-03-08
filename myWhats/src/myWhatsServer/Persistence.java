@@ -13,8 +13,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Persistence {
@@ -23,6 +25,8 @@ public class Persistence {
 	private final DateFormat FILENAMEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH mm ss SSS");
 	private File usersFile;
 	private Map<String,User> users;
+	private File groupsFile;
+	private List<Group> groups;
 	
 	private Persistence() {		
 		try {
@@ -31,10 +35,12 @@ public class Persistence {
 			usersFile.createNewFile();//cria ficheiro se este nao existe
 			users = new HashMap<>();
 			
-		
+			groupsFile = new File("Data/groups");
+			groupsFile.getParentFile().mkdirs();//cria caminho
+			groupsFile.createNewFile();//cria ficheiro se este nao existe
+			groups = new ArrayList<>();
 			
-			BufferedReader r = new BufferedReader(new FileReader(usersFile));
-			
+			BufferedReader r = new BufferedReader(new FileReader(usersFile));			
 			String s;
 			while((s = r.readLine()) != null){
 				User u = getUser(s);
@@ -46,9 +52,46 @@ public class Persistence {
 				users.put(u.getUsername(), u);
 			}			
 			r.close();
+			
+			r = new BufferedReader(new FileReader(groupsFile));		
+			while((s = r.readLine()) != null){
+				Group g = getGroup(s);
+				if(g == null){
+					System.out.println("O ficheiro de grupos está corrupto.");
+					r.close();
+					System.exit(0);
+				}					
+				groups.add(g);
+			}			
+			r.close();
+			
 		} catch (Exception e) {	e.printStackTrace();}
 	}
 	
+	/*
+	 * Retorna o grupo representado pela string s sob o formato grupo;master:user1:user2:user3:...
+	 * Return null caso o formato nao esteja em conformidade
+	 */
+	private Group getGroup(String s) {
+		String [] v = s.split(";"); // separa o nome do grupo dos elementos
+		if(v.length != 2) // se o formato esta errado
+			return null;	
+		
+		String [] v2 = v[1].split(":"); // lista dos elementos v2[0]= master
+		if(v2.length == 0) // se nao ha mestre escrito para o grupo
+			return null;
+		
+		User m = users.get(v2[0]);
+		Group g = new Group(m, v[0]);
+		
+		for(int i = 1; i < v2.length; i++){
+			User u = getUser(v2[i]);
+			g.addUser(u);
+		}
+		
+		return g;
+	}
+
 	/*
 	 * Retorna :
 	 * -1 - se utilizador e password não coincidem
@@ -123,7 +166,7 @@ public class Persistence {
 	 */
 	private synchronized User getUser(String s) {
 		String [] info = s.split(":");
-		if(info.length != 2)
+		if(info.length != 2) // se o formato esta errado
 			return null;
 		return new User(info[0], info[1]);
 	}
@@ -266,6 +309,5 @@ public class Persistence {
 			return null;
 		
 		return file;
-	}
-	
+	}	
 }
