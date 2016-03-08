@@ -72,7 +72,7 @@ public class Persistence {
 	 * Retorna o grupo representado pela string s sob o formato grupo;master:user1:user2:user3:...
 	 * Return null caso o formato nao esteja em conformidade
 	 */
-	private Group getGroup(String s) {
+	private synchronized Group getGroup(String s) {
 		String [] v = s.split(";"); // separa o nome do grupo dos elementos
 		if(v.length != 2) // se o formato esta errado
 			return null;	
@@ -121,6 +121,23 @@ public class Persistence {
 		try {
 			BufferedWriter w = new BufferedWriter(new FileWriter(usersFile,true));
 			w.write(u.getUsername()+":"+u.getPassword()+"\n");
+			w.close();
+		} catch (IOException e) {e.printStackTrace();}
+	}
+	
+	/*
+	 * Escreve o grupo g no ficheiro de grupos
+	 */
+	private synchronized void writeGroupToFile(Group g) {
+		try {
+			BufferedWriter w = new BufferedWriter(new FileWriter(groupsFile,true));
+			w.write(g.getName()+";");
+			w.write(g.getLeader().getUsername()+":");
+			
+			List<User> membros =  g.getMembers();
+			for(User u : membros)
+				w.write(":"+u.getUsername());
+			
 			w.close();
 		} catch (IOException e) {e.printStackTrace();}
 	}

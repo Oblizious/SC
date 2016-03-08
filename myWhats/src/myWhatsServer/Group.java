@@ -26,5 +26,9 @@ public class Group {
 	public String getName() {
 		return name;
 	}
+	
+	public List<User> getMembers(){
+		return users;
+	}
 
 }
