@@ -30,5 +30,13 @@ public class Group {
 	public List<User> getMembers(){
 		return users;
 	}
+	
+	public boolean userIsLeader(String username) {
+		return leader.getUsername().equals(username);
+	}
+	
+	public boolean removeUser(User user) {
+		return users.remove(user);
+	}
 
 }

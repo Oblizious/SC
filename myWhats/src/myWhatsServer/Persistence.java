@@ -26,7 +26,7 @@ public class Persistence {
 	private File usersFile;
 	private Map<String,User> users;
 	private File groupsFile;
-	private List<Group> groups;
+	private Map<String, Group> groups;
 	
 	private Persistence() {		
 		try {
@@ -38,7 +38,7 @@ public class Persistence {
 			groupsFile = new File("Data/groups");
 			groupsFile.getParentFile().mkdirs();//cria caminho
 			groupsFile.createNewFile();//cria ficheiro se este nao existe
-			groups = new ArrayList<>();
+			groups = new HashMap<>();
 			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));			
 			String s;
@@ -61,7 +61,7 @@ public class Persistence {
 					r.close();
 					System.exit(0);
 				}					
-				groups.add(g);
+				groups.put(g.getName(), g);
 			}			
 			r.close();
 			
@@ -137,7 +137,7 @@ public class Persistence {
 			List<User> membros =  g.getMembers();
 			for(User u : membros)
 				w.write(":"+u.getUsername());
-			
+			w.write("\n");
 			w.close();
 		} catch (IOException e) {e.printStackTrace();}
 	}
@@ -326,5 +326,32 @@ public class Persistence {
 			return null;
 		
 		return file;
-	}	
+	}
+	
+	public boolean addToGroup(String username, String contact, String groupname) {
+		Group group;
+		User user;
+		
+		if((user = users.get(contact)) == null || (group = groups.get(contact)) == null)
+			return false;
+		
+		if(!group.userIsLeader(username))
+			return false;
+		
+		return group.addUser(user);
+		
+	}
+	
+	public boolean removeFromGroup(String username, String contact, String groupname) {
+		Group group;
+		User user;
+		
+		if((user = users.get(contact)) == null || (group = groups.get(contact)) == null)
+			return false;
+		
+		if(!group.userIsLeader(username))
+			return false;
+		
+		return group.removeUser(user);
+	}
 }

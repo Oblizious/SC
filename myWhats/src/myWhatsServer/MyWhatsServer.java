@@ -260,12 +260,16 @@ public class MyWhatsServer {
 				return Persistence.getInstance().getContactFile(username, contact, filename);
 			}
 			
-			private String addToGroup(String user, String contact, String group) {
-				return null;
+			private String addToGroup(String username, String contact, String groupname) {
+				boolean result = Persistence.getInstance().addToGroup(username, contact, groupname);
+				if(result)
+					return "Utilizador adicionado ao grupo com sucesso";
+				else
+					return "Erro!";
 			}
 			
 			private String removeFromGroup(String user, String contact, String group) {
-				return null;
+				return 
 			}
 			
 			
