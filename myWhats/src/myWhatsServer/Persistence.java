@@ -145,8 +145,12 @@ public class Persistence {
 	 * Retorna true se bem sucedido, false caso ocorra erro
 	 */
 	public synchronized boolean saveMessage(String username, String contact, String message){
-		if(users.get(contact) == null) 
+		boolean isGroup = (groups.get(contact) == null);
+		
+		if(users.get(contact) == null && !isGroup) 
 			return false;
+		
+	
 		
 		Date date = new Date();
 		
@@ -336,6 +340,8 @@ public class Persistence {
 			g = new Group(users.get(username), groupname);
 			g.addUser(u);
 			writeGroupToFile(g);
+			File group = new File("Data/" + groupname + "/");
+			group.mkdirs();
 			return true;
 		}
 		
@@ -397,7 +403,7 @@ public class Persistence {
 		
 		Group g = groups.get(groupname);
 		if(g == null)
-			return true;		
+			return false;		
 		
 		if(!g.userIsLeader(username)) return false;
 		

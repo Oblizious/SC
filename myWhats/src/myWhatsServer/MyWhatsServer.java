@@ -269,7 +269,7 @@ public class MyWhatsServer {
 			}
 			
 			private String removeFromGroup(String username, String contact, String groupname) {
-				boolean result = Persistence.getInstance().addToGroup(username, contact, groupname);
+				boolean result = Persistence.getInstance().removeFromGroup(username, contact, groupname);
 				if(result)
 					return "Utilizador removido do grupo com sucesso";
 				else
