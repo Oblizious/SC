@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -157,7 +156,6 @@ public class Persistence {
 
 		Date date = new Date();
 		
-		String timestamp = TIMESTAMPFORMAT.format(date).toString();
 		String filename = FILENAMEFORMAT.format(date).toString();
 		
 		if(!isGroup) {
@@ -386,8 +384,7 @@ public class Persistence {
 			}
 		}
 		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		sb.append(dateFormat.format(file.lastModified()));
+		sb.append(TIMESTAMPFORMAT.format(file.lastModified()));
 		sb.append( "\n");
 	}
 	
@@ -416,7 +413,7 @@ public class Persistence {
 		return addToGroupFile(u, groupname);
 	}
 	
-	private synchronized boolean addToGroupFile(User u, String groupname) { //TODO problema de leaks...
+	private synchronized boolean addToGroupFile(User u, String groupname) {
 		File temp = new File("Data/groupsTMP");
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(groupsFile));
@@ -426,8 +423,11 @@ public class Persistence {
 			while((s = r.readLine()) != null){
 				String [] v = s.split(";");
 				
-				if(v.length < 2)
+				if(v.length < 2){
+					w.close();
+					r.close();
 					return false; // ficheiro encontra-se corrumpido	
+				}
 				
 				if(v[0].equals(groupname)){
 					w.write(s+":"+u.getUsername()+"\n");
@@ -443,10 +443,9 @@ public class Persistence {
 			return temp.renameTo(groupsFile);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
-		}		
+		}
 	}
 
 	/**
@@ -476,7 +475,7 @@ public class Persistence {
 		return removeFromGroupFile(u, groupname);
 	}
 	
-	private boolean removeFromGroupFile(User u, String groupname) { //TODO problema de leaks...
+	private boolean removeFromGroupFile(User u, String groupname) {
 		File temp = new File("Data/groupsTMP");
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(groupsFile));
@@ -486,8 +485,11 @@ public class Persistence {
 			while((s = r.readLine()) != null){
 				String [] v = s.split(";");
 				
-				if(v.length < 2)
+				if(v.length < 2){
+					w.close();
+					r.close();
 					return false; // ficheiro encontra-se corrumpido	
+				}
 				
 				if(v[0].equals(groupname)){
 					String [] v2 = v[1].split(":");
@@ -512,7 +514,6 @@ public class Persistence {
 			return temp.renameTo(groupsFile);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}		
@@ -523,7 +524,7 @@ public class Persistence {
 	 * @param groupname o nome do grupo a apagar
 	 * @return true se bem sucedido, false caso contrario
 	 */
-	public synchronized boolean deleteGroup(String groupname){ //TODO problema de leaks...
+	public synchronized boolean deleteGroup(String groupname){
 		try{	
 			groups.remove(groups.get(groupname)); // apaga o grupo da memória
 			
@@ -536,8 +537,11 @@ public class Persistence {
 			while((s = r.readLine()) != null){
 				String [] v = s.split(";");
 				
-				if(v.length < 2)
-					return false; // ficheiro encontra-se corrumpido			
+				if(v.length < 2){
+					w.close();
+					r.close();
+					return false; // ficheiro encontra-se corrumpido
+				}
 				
 				if(v[0].equals(groupname)) continue; // se eh a linha que representa o grupo a apagar
 				
