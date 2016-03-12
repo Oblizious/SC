@@ -157,26 +157,47 @@ public class Persistence {
 		String timestamp = TIMESTAMPFORMAT.format(date).toString();
 		String filename = FILENAMEFORMAT.format(date).toString();
 		
-		File file1 = new File("./Data/" + username + "/" + contact + "/" + filename);
-		file1.getParentFile().mkdirs();
-		File file2 = new File("./Data/" + contact + "/" + username + "/" + filename);
-		file2.getParentFile().mkdirs();
+		if(!isGroup) {
+			File file1 = new File("./Data/" + username + "/" + contact + "/" + filename);
+			file1.getParentFile().mkdirs();
+			File file2 = new File("./Data/" + contact + "/" + username + "/" + filename);
+			file2.getParentFile().mkdirs();
 		
-		try {
-			BufferedWriter w = new BufferedWriter(new FileWriter(file1));
-			w.write("Contact: " + contact + "\n");
-			w.write("me: " + message + "\n");
-			w.write(timestamp.toString());
-			w.close();
+			try {
+				BufferedWriter w = new BufferedWriter(new FileWriter(file1));
+				w.write("Contact: " + contact + "\n");
+				w.write("me: " + message + "\n");
+				w.write(timestamp.toString());
+				w.close();
 			
-			w  = new BufferedWriter(new FileWriter(file2));
-			w.write("Contact: " + username + "\n");
-			w.write(username + ": " + message + "\n");
-			w.write(timestamp.toString());
-			w.close();
+				w  = new BufferedWriter(new FileWriter(file2));
+				w.write("Contact: " + username + "\n");
+				w.write(username + ": " + message + "\n");
+				w.write(timestamp.toString());
+				w.close();
 			
-		} catch (IOException e) {e.printStackTrace(); return false;}
-		
+			} catch (IOException e) {e.printStackTrace(); return false;}
+		}
+		else {
+			if(users.get(username).userBelongsToGroup(contact)) {
+				File file = new File("./Data/" + contact + "/" + filename);
+				file.getParentFile().mkdirs();
+				try {
+					BufferedWriter w = new BufferedWriter(new FileWriter(file));
+					w.write("Contact: " + contact + "\n");
+					w.write(username + ": " + message + "\n");
+					w.write(timestamp.toString());
+					w.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				
+			}
+			
+			
+			
+		}
 		return true;
 	}
 
@@ -342,6 +363,7 @@ public class Persistence {
 			writeGroupToFile(g);
 			File group = new File("Data/" + groupname + "/");
 			group.mkdirs();
+			groups.put(groupname, g);
 			return true;
 		}
 		
