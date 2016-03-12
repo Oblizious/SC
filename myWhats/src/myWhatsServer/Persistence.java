@@ -548,6 +548,13 @@ public class Persistence {
 			r.close();		
 			
 			groupsFile.delete();
+			
+			File groupFile = new File ("Data/" + groupname);
+			String files[] = groupFile.list();
+			for(String filename : files) {
+				new File(filename).delete();
+			}
+			groupFile.delete();
 			return temp.renameTo(groupsFile);
 		}catch(IOException e){
 			e.printStackTrace();				
