@@ -187,7 +187,6 @@ public class Persistence {
 				file.getParentFile().mkdirs();
 				try {
 					BufferedWriter w = new BufferedWriter(new FileWriter(file));
-					w.write("Contact: " + contact + "\n");
 					w.write(username + ": " + message + "\n");
 					w.write(timestamp.toString());
 					w.close();
@@ -303,6 +302,8 @@ public class Persistence {
 		StringBuilder sb = new StringBuilder();
 		for(File d : dirs) {
 			File mostRecent = getMostRecentFile(d);
+			sb.append("Contact: " + d.getName());
+			sb.append( "\n");
 			getFileData(mostRecent, sb);
 		}
 		
@@ -311,6 +312,8 @@ public class Persistence {
 			if(g.userBelongsToGroup(username)) {
 				File groupDir = new File("Data/" + g.getName());
 				File mostRecent = getMostRecentFile(groupDir );
+				sb.append("Contact: " + g.getName());
+				sb.append( "\n");
 				getFileData(mostRecent, sb);
 			}
 		}
@@ -369,8 +372,13 @@ public class Persistence {
 	
 	public void getFileData(File file, StringBuilder sb) {
 		if(file.getName().lastIndexOf(".") != -1) {
-			sb.append(file.getName().substring(0, file.getName().lastIndexOf("-)")) + ": " 
-		              + file.getName().substring(file.getName().lastIndexOf("-)") + 2,  file.getName().length()));
+			sb.append(file.getName().substring(0, file.getName().lastIndexOf("-)")) + ": ");
+			sb.append(file.getName().substring(file.getName().lastIndexOf("-)") + 2,  file.getName().length()));
+			sb.append( "\n");
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			sb.append(dateFormat.format(file.lastModified()));
+			sb.append( "\n");
 		}
 		
 		else {
