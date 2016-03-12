@@ -38,5 +38,13 @@ public class Group {
 	public boolean removeUser(User user) {
 		return users.remove(user);
 	}
+	
+	public boolean userBelongsToGroup(String name) {
+		for(User user : users) {
+			if(user.getUsername().equals(name))
+				return true;
+		}
+		return false;
+	}
 
 }

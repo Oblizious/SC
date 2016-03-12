@@ -84,8 +84,10 @@ public class Persistence {
 		Group g = new Group(m, v[0]);
 		
 		for(int i = 1; i < v2.length; i++){
-			User u = getUser(v2[i]);
-			g.addUser(u);
+			User u = users.get(v2[i]);
+			if(u != null) {
+				g.addUser(u); // se o user nao tiver sido caregado para memoria antes eh ignorado
+			}
 		}
 		
 		return g;
@@ -145,13 +147,12 @@ public class Persistence {
 	 * Retorna true se bem sucedido, false caso ocorra erro
 	 */
 	public synchronized boolean saveMessage(String username, String contact, String message){
-		boolean isGroup = (groups.get(contact) == null);
+		Group group = groups.get(contact);
+		boolean isGroup = (group != null);
 		
 		if(users.get(contact) == null && !isGroup) 
 			return false;
-		
-	
-		
+
 		Date date = new Date();
 		
 		String timestamp = TIMESTAMPFORMAT.format(date).toString();
@@ -179,7 +180,7 @@ public class Persistence {
 			} catch (IOException e) {e.printStackTrace(); return false;}
 		}
 		else {
-			if(users.get(username).userBelongsToGroup(contact)) {
+			if(group.userBelongsToGroup(username)) {
 				File file = new File("./Data/" + contact + "/" + filename);
 				file.getParentFile().mkdirs();
 				try {
@@ -191,12 +192,7 @@ public class Persistence {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-
-				
 			}
-			
-			
-			
 		}
 		return true;
 	}
@@ -217,37 +213,51 @@ public class Persistence {
     }	
 	
 	public synchronized boolean saveFile(String username, String contact, File file, String filename){
-		if(users.get(contact) == null) {
+		Group group = groups.get(contact);
+		boolean isGroup = (group != null);
+		
+		if(users.get(contact) == null && !isGroup) {
 			file.delete();
 			return false;	
 		}
 		
-		try {
-			
-			File result = new File("Data/" + contact + "/" + username + "/" + filename);
-			result.getParentFile().mkdirs();	
-			
-			InputStream inStream = new FileInputStream(file);
-			OutputStream outStream = new FileOutputStream(result);
-
-			byte[] buffer = new byte[1024];
-
-			int length;
-			while ((length = inStream.read(buffer)) > 0) {
-
-				outStream.write(buffer, 0, length);
-
-			}
-
-			inStream.close();
-			outStream.close();
-			
-			file.delete();
-			return true;
-
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(isGroup && !group.userBelongsToGroup(username)) {
+			return false;
 		}
+		
+		
+		File result;
+		if(!isGroup)
+			result = new File("Data/" + contact + "/" + username + "/" + username + "->" + filename);
+		else
+			result = new File("./Data/" + contact + "/" + username + "->" + filename);
+		
+		result.getParentFile().mkdirs();	
+			try {
+			
+				result.getParentFile().mkdirs();	
+			
+				InputStream inStream = new FileInputStream(file);
+				OutputStream outStream = new FileOutputStream(result);
+
+				byte[] buffer = new byte[1024];
+
+				int length;
+				while ((length = inStream.read(buffer)) > 0) {
+
+					outStream.write(buffer, 0, length);
+
+				}
+
+				inStream.close();
+				outStream.close();
+			
+				file.delete();
+				return true;
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		
 		return false;
 	}
@@ -305,6 +315,7 @@ public class Persistence {
 			}
 		}
 		
+		
 		return sb.toString();
 	}
 	
@@ -358,7 +369,9 @@ public class Persistence {
 		
 		Group g = groups.get(groupname);
 		if(g == null){// grupo nao exite entao cria-se
-			g = new Group(users.get(username), groupname);
+			User leader = users.get(username);
+			g = new Group(leader, groupname);
+			g.addUser(leader);
 			g.addUser(u);
 			writeGroupToFile(g);
 			File group = new File("Data/" + groupname + "/");
