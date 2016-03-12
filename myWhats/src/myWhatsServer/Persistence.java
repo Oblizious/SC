@@ -415,7 +415,7 @@ public class Persistence {
 	 * @return true se apagou o grupo com sucesso ou este nao existia, false caso contrario
 	 */
 	public synchronized boolean removeFromGroup(String username, String contact, String groupname) {
-		if(username == contact){
+		if(username.equals(contact)){
 			deleteGroup(groupname);
 			return true;
 		}
@@ -429,7 +429,7 @@ public class Persistence {
 		
 		if(!g.userIsLeader(username)) return false;
 		
-		//se chegou aqui entao estah pronto a adiciona ao grupo
+		//se chegou aqui entao estah pronto a remover do grupo
 		g.removeUser(u);
 		return removeFromGroupFile(u, groupname);
 	}
@@ -452,12 +452,11 @@ public class Persistence {
 					StringBuilder sb = new StringBuilder(v[0]+";");
 					
 					for(int i = 0; i < v2.length; i++){
-						if(!v2[i].equals(u.getUsername()) && i == v2.length - 2) // para nao meter : no fim da linha do grupo
-							sb.append(v2[i]);
-						else if(!v2[i].equals(u.getUsername()))
-							sb.append(v2[i]+":");
-					}					
+						if(!v2[i].equals(u.getUsername()))
+							sb.append(v2[i]+":");						
+					}
 					
+					sb.deleteCharAt(sb.length()-1);	// para remover o ultimo ':'				
 					w.write(sb.toString()+"\n");
 				}else{		
 					w.write(s+"\n");
