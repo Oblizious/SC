@@ -168,15 +168,11 @@ public class Persistence {
 		
 			try {
 				BufferedWriter w = new BufferedWriter(new FileWriter(file1));
-				w.write("Contact: " + contact + "\n");
 				w.write("me: " + message + "\n");
-				w.write(timestamp.toString());
 				w.close();
 			
 				w  = new BufferedWriter(new FileWriter(file2));
-				w.write("Contact: " + username + "\n");
 				w.write(username + ": " + message + "\n");
-				w.write(timestamp.toString());
 				w.close();
 			
 			} catch (IOException e) {e.printStackTrace(); return false;}
@@ -188,7 +184,6 @@ public class Persistence {
 				try {
 					BufferedWriter w = new BufferedWriter(new FileWriter(file));
 					w.write(username + ": " + message + "\n");
-					w.write(timestamp.toString());
 					w.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -375,10 +370,6 @@ public class Persistence {
 			sb.append(file.getName().substring(0, file.getName().lastIndexOf("-)")) + ": ");
 			sb.append(file.getName().substring(file.getName().lastIndexOf("-)") + 2,  file.getName().length()));
 			sb.append( "\n");
-			
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			sb.append(dateFormat.format(file.lastModified()));
-			sb.append( "\n");
 		}
 		
 		else {
@@ -389,12 +380,15 @@ public class Persistence {
 				while((s = br.readLine()) != null)
 					sb.append(s + "\n");
 			
-				sb.append("\n");
 				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		sb.append(dateFormat.format(file.lastModified()));
+		sb.append( "\n");
 	}
 	
 	
