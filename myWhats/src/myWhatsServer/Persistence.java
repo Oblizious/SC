@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -228,9 +230,9 @@ public class Persistence {
 		
 		File result;
 		if(!isGroup)
-			result = new File("Data/" + contact + "/" + username + "/" + username + "->" + filename);
+			result = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
 		else
-			result = new File("./Data/" + contact + "/" + username + "->" + filename);
+			result = new File("Data/" + contact + "/" + username + "-)" + filename);
 		
 		result.getParentFile().mkdirs();	
 			try {
@@ -301,30 +303,33 @@ public class Persistence {
 		StringBuilder sb = new StringBuilder();
 		for(File d : dirs) {
 			File mostRecent = getMostRecentFile(d);
-			
-			try {
-				BufferedReader br = new  BufferedReader (new FileReader(mostRecent));
-				String s;
-				while((s = br.readLine()) != null)
-					sb.append(s + "\n");
-				
-				sb.append("\n");
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			getFileData(mostRecent, sb);
 		}
 		
-		
+		List<Group> groupList = new ArrayList<Group>(groups.values());
+		for(Group g : groupList) {
+			if(g.userBelongsToGroup(username)) {
+				File groupDir = new File("Data/" + g.getName());
+				File mostRecent = getMostRecentFile(groupDir );
+				getFileData(mostRecent, sb);
+			}
+		}
 		return sb.toString();
 	}
 	
 	public synchronized String getAllContactCommunications(String username, String contact) {
-		if(users.get(contact) == null) {
+		Group group = groups.get(contact);
+		boolean isGroup = (group != null);
+		
+		if(users.get(contact) == null && !isGroup) {
 			return null;	
 		}
 		
-		File dir = new File("Data/" + username + "/" + contact);
+		File dir;
+		if(!isGroup)
+			dir = new File("Data/" + username + "/" + contact);
+		else
+			dir = new File("Data/" + contact);
 		
 		File[] files = dir.listFiles(new FileFilter() {
 
@@ -336,32 +341,54 @@ public class Persistence {
 		});
 		StringBuilder sb = new StringBuilder();
 		for(File file : files) {
-			try {
-				BufferedReader br = new  BufferedReader (new FileReader(file));
-				String s;
-				while((s = br.readLine()) != null)
-					sb.append(s + "\n");
-				
-				sb.append("\n");
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			getFileData(file, sb);
 		}
 		
 		return sb.toString();
 	}
 	
 	public synchronized File getContactFile(String username, String contact, String filename) {
-		if(users.get(contact) == null)
-			return null;
+		Group group = groups.get(contact);
+		boolean isGroup = (group != null);
 		
-		File file = new File("Data/" + contact + "/" + username + "/" + filename);
+		if(users.get(contact) == null && !isGroup)
+			return null;	
+		
+		File file;
+		
+		if(!isGroup)
+			file = new File("Data/" + contact + "/" + username + "/" + username + "->" + filename);
+		else
+			file = new File("Data/" + contact + "/" + username + "->" + filename);
+		
 		if(!file.exists())
 			return null;
 		
 		return file;
 	}
+	
+	public void getFileData(File file, StringBuilder sb) {
+		if(file.getName().lastIndexOf(".") != -1) {
+			sb.append(file.getName().substring(0, file.getName().lastIndexOf("-)")) + ": " 
+		              + file.getName().substring(file.getName().lastIndexOf("-)") + 2,  file.getName().length()));
+		}
+		
+		else {
+		
+			try {
+				BufferedReader br = new  BufferedReader (new FileReader(file));
+				String s;
+				while((s = br.readLine()) != null)
+					sb.append(s + "\n");
+			
+				sb.append("\n");
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	public synchronized boolean addToGroup(String username, String contact, String groupname) {	
 		User u = users.get(contact);
