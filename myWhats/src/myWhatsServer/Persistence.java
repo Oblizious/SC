@@ -28,6 +28,9 @@ public class Persistence {
 	private File groupsFile;
 	private Map<String, Group> groups;
 	
+	/**
+	 * 
+	 */
 	private Persistence() {		
 		try {
 			usersFile = new File("Data/users");
@@ -68,9 +71,11 @@ public class Persistence {
 		} catch (Exception e) {	e.printStackTrace();}
 	}
 	
-	/*
-	 * Retorna o grupo representado pela string s sob o formato grupo;master:user1:user2:user3:...
-	 * Return null caso o formato nao esteja em conformidade
+	/**
+	 * Funcao que cria um grupo a partir da sua reprsentacao em string
+	 * @param s Representacao em string do grupo com o seguinte formato grupo;master:user1:user2:...
+	 * @requires s != null
+	 * @return o grupo criado ou null caso o formato nao esteja em conformidade
 	 */
 	private synchronized Group getGroup(String s) {
 		String [] v = s.split(";"); // separa o nome do grupo dos elementos
@@ -93,12 +98,16 @@ public class Persistence {
 		
 		return g;
 	}
-
-	/*
-	 * Retorna :
-	 * -1 - se utilizador e password não coincidem
-	 *  0 - Se utilizador existe e e a password coincide
-	 *  1- Se utilizador não existe e foi criado com sucesso
+	
+	/**
+	 * Funcao que verifica se um utilizador com dado nome e uma dada password pode
+	 * fazer login. Se esse um utilizador ainda nao estiver registado, eh registado.
+	 * @param username Nome do utilizador 
+	 * @param password Password do utilizador
+	 * @requires username != null && password != null
+	 * @return -1 - se o username e a password não coincidem
+	 * 			0 - se o username e a password coincidem
+	 * 			1 - se este username ainda não existe e foi criado com sucesso
 	 */
 	public synchronized int verifyUser(String username, String password){
 		User u = users.get(username);
@@ -116,8 +125,10 @@ public class Persistence {
 		return u.getPassword().equals(password) ? 0 : -1;
 	}
 	
-	/*
-	 * Escreve o utilizador u no ficheiro de utilizadores
+	/**
+	 * Escreve um utilizador no ficheiro de utilizadores
+	 * @param u uilizador a ser escrito
+	 * @requires u != null
 	 */
 	private synchronized void writeUserToFile(User u) {
 		try {
@@ -127,8 +138,10 @@ public class Persistence {
 		} catch (IOException e) {e.printStackTrace();}
 	}
 	
-	/*
-	 * Escreve o grupo g no ficheiro de grupos
+	/**
+	 * Escreve um grupo no ficheiro de grupos
+	 * @param g grupo a ser escrito
+	 * @requires g != null
 	 */
 	private synchronized void writeGroupToFile(Group g) {
 		try {
@@ -144,8 +157,14 @@ public class Persistence {
 		} catch (IOException e) {e.printStackTrace();}
 	}
 
-	/*
-	 * Retorna true se bem sucedido, false caso ocorra erro
+	/**
+	 * Função que guarda uma messagem trocada entre dois utilizadores ou um utilizador 
+	 * e um grupo em ficheiro 
+	 * @param username nome do utilizador que enviou a messagem
+	 * @param contact nome do destinatário da messagem(utilizador ou grupo)
+	 * @param message messagem de texto a ser guardada
+	 * @requires username != null && contact != null && message != null
+	 * @return true se a mensagem foi guardada com sucesso, caso contrario false
 	 */
 	public synchronized boolean saveMessage(String username, String contact, String message){
 		Group group = groups.get(contact);
