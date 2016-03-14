@@ -19,6 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 
+ * @author Telmo Santos 44839, Luís Carvalho 44907
+ *
+ */
 public class Persistence {
 	private static final Persistence INSTANCE = new Persistence();
 	private final DateFormat TIMESTAMPFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -72,7 +77,7 @@ public class Persistence {
 	}
 	
 	/**
-	 * Funcao que cria um grupo a partir da sua reprsentacao em string
+	 * Cria um grupo a partir da sua reprsentacao em string
 	 * @param s Representacao em string do grupo com o seguinte formato grupo;master:user1:user2:...
 	 * @requires s != null
 	 * @return o grupo criado ou null caso o formato nao esteja em conformidade
@@ -100,7 +105,7 @@ public class Persistence {
 	}
 	
 	/**
-	 * Funcao que verifica se um utilizador com dado nome e uma dada password pode
+	 * Verifica se um utilizador com dado nome e uma dada password pode
 	 * fazer login. Se esse um utilizador ainda nao estiver registado, eh registado.
 	 * @param username Nome do utilizador 
 	 * @param password Password do utilizador
@@ -158,7 +163,7 @@ public class Persistence {
 	}
 
 	/**
-	 * Função que guarda uma messagem trocada entre dois utilizadores ou um utilizador 
+	 * Guarda uma messagem trocada entre dois utilizadores ou um utilizador 
 	 * e um grupo em ficheiro 
 	 * @param username nome do utilizador que enviou a messagem
 	 * @param contact nome do destinatário da messagem(utilizador ou grupo)
@@ -210,9 +215,11 @@ public class Persistence {
 		return true;
 	}
 
-	/*
-	 * Retorna o utilizador representado pela string s sob o formato user:password
-	 * Return null caso o formato nao esteja em conformidade
+	/**
+	 * Cria um user a partir da sua reprsentacao em string
+	 * @param s representação em string de um user com o formato nome:password
+	 * @requires s != null
+	 * @return u o user criado ou null caso o formato nao esteja em conformidade
 	 */
 	private synchronized User getUser(String s) {
 		String [] info = s.split(":");
@@ -225,6 +232,16 @@ public class Persistence {
         return INSTANCE;
     }	
 	
+	/**
+	 * Permite guardar um dado ficheiro enviado por um utilizador para 
+	 * um utilizador ou grupo
+	 * @param username nome do utilizador que enviou o ficheiro
+	 * @param contact nome do utilizador/grupo que recebe o ficheiro
+	 * @param file ficheiro enviado
+	 * @param filename nome do ficheiro enviado
+	 * @requires username != null && contact != null && file != null && filename != null
+	 * @return true se o ficheiro foi guardado com sucesso, false caso contrario
+	 */
 	public synchronized boolean saveFile(String username, String contact, File file, String filename){
 		Group group = groups.get(contact);
 		boolean isGroup = (group != null);
@@ -237,7 +254,6 @@ public class Persistence {
 		if(isGroup && !group.userBelongsToGroup(username)) {
 			return false;
 		}
-		
 		
 		File result;
 		if(!isGroup)
@@ -275,6 +291,12 @@ public class Persistence {
 		return false;
 	}
 	
+	/**
+	 * Retorna o ficheiro mas recente num dado diretorio
+	 * @param contactDir diretorio com ficheiros
+	 * @requires contactDir != null
+	 * @return o ficheiro mais recente ou null caso o directorio esteja vazio
+	 */
 	private synchronized File getMostRecentFile(File contactDir) {
 
 		File[] files = contactDir.listFiles(new FileFilter() {
@@ -299,6 +321,13 @@ public class Persistence {
 		return mostRecent;
 	}
 	
+	/**
+	 * Obtem as comunicações mais recentes de todos os contactos e 
+	 * grupos de um dado utilizador
+	 * @param username nome do utilizador
+	 * @requires username != null
+	 * @return todas as comunicações mais recentes
+	 */
 	public synchronized String getMostRecentCommunications(String username) {
 		
 		File dir = new File("Data/" + username);
@@ -332,6 +361,13 @@ public class Persistence {
 		return sb.toString();
 	}
 	
+	/**
+	 * Obtem todas os comunições entre um utilizador e um outro utilizador ou grupo 
+	 * @param username nome do utilizador
+	 * @param contact nome de um outro utilizador ou grupo
+	 * @requires username != null && contact != null
+	 * @return todas as comunicações entre um utilizador e outro utilizador ou grupo
+	 */
 	public synchronized String getAllContactCommunications(String username, String contact) {
 		Group group = groups.get(contact);
 		boolean isGroup = (group != null);
@@ -362,6 +398,14 @@ public class Persistence {
 		return sb.toString();
 	}
 	
+	/**
+	 * Obtem um ficheiro partilhado entre um utilizador e um outro utilizador/grupo
+	 * @param username nome do utilizador
+	 * @param contact nome do outro utilizador ou grupo
+	 * @param filename nome do ficheiro
+	 * @requires username != null && contact != null && filename != null
+	 * @return o ficheiro ou null se o ficheiro não existir
+	 */
 	public synchronized File getContactFile(String username, String contact, String filename) {
 		Group group = groups.get(contact);
 		boolean isGroup = (group != null);
@@ -372,9 +416,9 @@ public class Persistence {
 		File file;
 		
 		if(!isGroup)
-			file = new File("Data/" + contact + "/" + username + "/" + username + "->" + filename);
+			file = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
 		else
-			file = new File("Data/" + contact + "/" + username + "->" + filename);
+			file = new File("Data/" + contact + "/" + username + "-)" + filename);
 		
 		if(!file.exists())
 			return null;
@@ -382,10 +426,17 @@ public class Persistence {
 		return file;
 	}
 	
+	/**
+	 * Escreve num StringBuilder o conteudo do ficheiro se este for de texto, 
+	 * caso contrario escreve o seu nome
+	 * @param file ficheiro do qual se vai ler o conteudo
+	 * @param sb StringBuilder onde vai ser escrito o conteudo do ficheiro
+	 * @requires file != null && sb != null
+	 */
 	public void getFileData(File file, StringBuilder sb) {
 		if(file.getName().lastIndexOf(".") != -1) {
-			sb.append(file.getName().substring(0, file.getName().lastIndexOf("-)")) + ": ");
-			sb.append(file.getName().substring(file.getName().lastIndexOf("-)") + 2,  file.getName().length()));
+			sb.append(file.getName().substring(0, file.getName().indexOf("-)")) + ": ");
+			sb.append(file.getName().substring(file.getName().indexOf("-)") + 2,  file.getName().length()));
 			sb.append( "\n");
 		}
 		
@@ -407,7 +458,15 @@ public class Persistence {
 		sb.append( "\n");
 	}
 	
-	
+	/**
+	 * Adiciona um utilizador a um grupo e cria-o se não existir
+	 * @param username nome do utilizador que pretende adicionar outro utilizador
+	 * @param contact nome do utitilizador a ser adicionado
+	 * @param groupname nome do grupo
+	 * @requires username != null && contact != null && groupname != null
+	 * @return true se o utilizador foi adicionado ao grupo com sucesso
+	 * 		   false caso contrario
+	 */
 	public synchronized boolean addToGroup(String username, String contact, String groupname) {	
 		User u = users.get(contact);
 		if(u == null) return false;
@@ -432,6 +491,14 @@ public class Persistence {
 		return addToGroupFile(u, groupname);
 	}
 	
+	/**
+	 * Adiciona um utilizador adicionado a um grupo ao ficheiro de grupos
+	 * @param u utilizador a ser adicionado ao ficheiro
+	 * @param groupname nome do grupo
+	 * @requires u != null && groupname != null
+	 * @return true se foi adicionado ao ficheiro com sucesso
+	 *         false caso contrario
+	 */
 	private synchronized boolean addToGroupFile(User u, String groupname) {
 		File temp = new File("Data/groupsTMP");
 		try {
@@ -468,11 +535,13 @@ public class Persistence {
 	}
 
 	/**
-	 * 
-	 * @param username
-	 * @param contact
-	 * @param groupname
-	 * @return true se apagou o grupo com sucesso ou este nao existia, false caso contrario
+	 * Remove um utilizador de um grupo, se o utilizador que 
+	 * se remove for o lider com o grupo é apagado
+	 * @param username nome do utilizador que pretende remover outro utilizador
+	 * @param contact nome do utilizador a ser removido
+	 * @param groupname nome do grupo
+	 * @require username != null && contact != null && groupname != null
+	 * @return true se removeu o utilizador do grupo, false caso contrario
 	 */
 	public synchronized boolean removeFromGroup(String username, String contact, String groupname) {
 		if(username.equals(contact)){
@@ -494,6 +563,14 @@ public class Persistence {
 		return removeFromGroupFile(u, groupname);
 	}
 	
+	/**
+	 * Remove o utilizador do ficheiro de grupos
+	 * @param u utilizador a ser removido do grupo
+	 * @param groupname nome do grupo
+	 * @requires u != null && groupname != null
+	 * @return true se o utilizador foi removido com sucesso do ficheiro,
+	 *         false caso contrario 
+	 */
 	private boolean removeFromGroupFile(User u, String groupname) {
 		File temp = new File("Data/groupsTMP");
 		try {
@@ -539,7 +616,7 @@ public class Persistence {
 	}
 
 	/**
-	 * Apaga um grupo tanto da persistencia como da memoria
+	 * Apaga um grupo tanto da persistencia como da memoria, apagando todas mensagens e ficheiros
 	 * @param groupname o nome do grupo a apagar
 	 * @return true se bem sucedido, false caso contrario
 	 */
