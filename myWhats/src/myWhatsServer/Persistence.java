@@ -32,6 +32,8 @@ public class Persistence {
 	private Map<String,User> users;
 	private File groupsFile;
 	private Map<String, Group> groups;
+	private Map<String, Long> timestamps;
+	private File timestampsFile;
 	
 	/**
 	 * 
@@ -47,6 +49,11 @@ public class Persistence {
 			groupsFile.getParentFile().mkdirs();//cria caminho
 			groupsFile.createNewFile();//cria ficheiro se este nao existe
 			groups = new HashMap<>();
+			
+			timestampsFile = new File("Data/timestamps");
+			timestampsFile.getParentFile().mkdirs();
+			timestampsFile.createNewFile();
+			timestamps = new HashMap<>();
 			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));			
 			String s;
@@ -71,6 +78,12 @@ public class Persistence {
 				}					
 				groups.put(g.getName(), g);
 			}			
+			r.close();
+			
+			r = new BufferedReader(new FileReader(timestampsFile));
+			while((s = r.readLine()) != null) {
+				addTimestampToMap(s);
+			}
 			r.close();
 			
 		} catch (Exception e) {	e.printStackTrace();}
@@ -102,6 +115,12 @@ public class Persistence {
 		}
 		
 		return g;
+	}
+	
+	private synchronized void addTimestampToMap(String s) {
+		String [] v = s.split(":");
+		if(v.length == 2)
+			timestamps.put(v[0], Long.getLong(v[1]));
 	}
 	
 	/**
@@ -149,8 +168,9 @@ public class Persistence {
 	 * @requires g != null
 	 */
 	private synchronized void writeGroupToFile(Group g) {
+		BufferedWriter w = null;
 		try {
-			BufferedWriter w = new BufferedWriter(new FileWriter(groupsFile,true));
+			w = new BufferedWriter(new FileWriter(groupsFile,true));
 			w.write(g.getName()+";");
 			w.write(g.getLeader().getUsername());
 			
@@ -159,7 +179,9 @@ public class Persistence {
 				w.write(":"+u.getUsername());
 			w.write("\n");
 			w.close();
-		} catch (IOException e) {e.printStackTrace();}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 
 	/**
@@ -189,6 +211,12 @@ public class Persistence {
 			file2.getParentFile().mkdirs();
 		
 			try {
+				if(!addFileToTimestamps(file1))
+					return false;
+				
+				if(!addFileToTimestamps(file2))
+					return false;
+				
 				BufferedWriter w = new BufferedWriter(new FileWriter(file1));
 				w.write("me: " + message + "\n");
 				w.close();
@@ -262,27 +290,27 @@ public class Persistence {
 			result = new File("Data/" + contact + "/" + username + "-)" + filename);
 		
 		result.getParentFile().mkdirs();	
-			try {
+		
+		try {
 			
-				result.getParentFile().mkdirs();	
+			if(!addFileToTimestamps(result))
+				return false;
 			
-				InputStream inStream = new FileInputStream(file);
-				OutputStream outStream = new FileOutputStream(result);
+			InputStream inStream = new FileInputStream(file);
+			OutputStream outStream = new FileOutputStream(result);
 
-				byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[1024];
 
-				int length;
-				while ((length = inStream.read(buffer)) > 0) {
+			int length;
+			while ((length = inStream.read(buffer)) > 0) {
+				outStream.write(buffer, 0, length);
+			}
 
-					outStream.write(buffer, 0, length);
-
-				}
-
-				inStream.close();
-				outStream.close();
+			inStream.close();
+			outStream.close();
 			
-				file.delete();
-				return true;
+			file.delete();
+			return true;
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -308,16 +336,16 @@ public class Persistence {
 			
 		});
 		
-		long modifiedTime = 0;
+		long mostRecentTime = 0;
 		File mostRecent = null;
 		
 		for(File file : files) {
-			if(file.lastModified() > modifiedTime) {
+			long aux = timestamps.get(file.getAbsolutePath());	
+			if(aux > mostRecentTime) {
 				mostRecent = file;
-				modifiedTime = file.lastModified();
+				mostRecentTime = aux;
 			}
 		}
-		
 		return mostRecent;
 	}
 	
@@ -454,7 +482,7 @@ public class Persistence {
 			}
 		}
 		
-		sb.append(TIMESTAMPFORMAT.format(file.lastModified()));
+		sb.append(TIMESTAMPFORMAT.format(timestamps.get(file)));
 		sb.append( "\n");
 	}
 	
@@ -660,5 +688,19 @@ public class Persistence {
 			e.printStackTrace();				
 			return false;
 		}		
+	}
+	
+	private boolean addFileToTimestamps(File file) throws IOException {
+		String path = file.getAbsolutePath();
+		long timestamp = file.lastModified();
+		if(timestamps.containsKey(path))
+			return false;
+		
+		timestamps.put(path, timestamp);
+		BufferedWriter bw = new BufferedWriter(new FileWriter(groupsFile,true));
+		bw.write(path + ":" + timestamp + "\n");
+		bw.close();
+		
+		return true;
 	}
 }

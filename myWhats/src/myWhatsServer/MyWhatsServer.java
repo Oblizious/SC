@@ -11,8 +11,17 @@ import java.net.Socket;
 
 import Resources.MessageFlags;
 
+/**
+ * 
+ * @author lapc1
+ *
+ */
 public class MyWhatsServer {
 	
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		if(args.length < 1){
 			System.out.println("Como correr : MyWhatsServer <porto>");
@@ -26,6 +35,10 @@ public class MyWhatsServer {
 		server.startServer(porto);
 	}
 	
+	/**
+	 * 
+	 * @param porto
+	 */
 	public void startServer (int porto){
 		ServerSocket sSoc = null;
         
@@ -54,10 +67,19 @@ public class MyWhatsServer {
 	}
 	
 	//Threads utilizadas para comunicao com os clientes
+	/**
+	 * 
+	 * @author lapc1
+	 *
+	 */
 	private	class ServerThread extends Thread {
 
 			private Socket socket = null;
 
+			/**
+			 * 
+			 * @param inSoc
+			 */
 			ServerThread(Socket inSoc) {
 				socket = inSoc;
 				System.out.println("thread do server para cada cliente");
@@ -83,14 +105,15 @@ public class MyWhatsServer {
 				}
 			}
 			
+			/**
+			 * 
+			 * @param inStream
+			 * @param outStream
+			 * @throws ClassNotFoundException
+			 * @throws IOException
+			 */
 			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream) throws ClassNotFoundException, IOException {
-				
-				String contact;
-				MessageFlags end;
-				String group;
-				String answer;
-				String filename;
-				
+								
 				String user = (String)inStream.readObject();
 				String passwd = (String)inStream.readObject();
 				
@@ -111,20 +134,18 @@ public class MyWhatsServer {
 							break;
 						
 						case M_MESSAGE:
-							contact = (String) inStream.readObject();
+							String contact = (String) inStream.readObject();
 							String text = (String) inStream.readObject();
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = saveMessage(user, contact, text);
-								outStream.writeObject(answer);
-							}
+							MessageFlags end = (MessageFlags) inStream.readObject();
+							if(end.equals(MessageFlags.END_MESSAGE))
+								outStream.writeObject(saveMessage(user, contact, text));
 							else
 								outStream.writeObject("Error");
 							break;
 						
 						case F_MESSAGE:
 							contact = (String) inStream.readObject();
-							filename = (String) inStream.readObject();
+							String filename = (String) inStream.readObject();
 							long fileSize = (long) inStream.readObject();
 							long alreadyRead = 0;
 							
@@ -132,32 +153,25 @@ public class MyWhatsServer {
 							FileOutputStream fileOutStream = new FileOutputStream(file);
 							byte[] buffer = new byte[1024];
 							
-							System.out.println(fileSize);
-							
                             while(alreadyRead < fileSize) {
                                 int size = inStream.read(buffer);
-                                System.out.println(size);
                                 fileOutStream.write(buffer, 0, size);
                                 alreadyRead += size;
                             }
                             
                             fileOutStream.close();
-                            
+                           
 							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = saveFile(user, contact, file, filename);
-								outStream.writeObject(answer);
-							}
+							if(end.equals(MessageFlags.END_MESSAGE))
+								outStream.writeObject(saveFile(user, contact, file, filename));
 							else
 								outStream.writeObject("Error");
 							break;
 						
 						case R0_MESSAGE:
 							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = getMostRecentCommunications(user);
-								outStream.writeObject(answer);
-							}
+							if(end.equals(MessageFlags.END_MESSAGE))
+								outStream.writeObject(getMostRecentCommunications(user));
 							else
 								outStream.writeObject("Error");
 							break;
@@ -165,10 +179,8 @@ public class MyWhatsServer {
 						case R1_MESSAGE:
 							contact = (String) inStream.readObject();
 							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = getAllContactCommunications(user, contact);
-								outStream.writeObject(answer);
-							}
+							if(end.equals(MessageFlags.END_MESSAGE))
+								outStream.writeObject(getAllContactCommunications(user, contact));
 							else
 								outStream.writeObject("Error");
 							break;
@@ -192,8 +204,6 @@ public class MyWhatsServer {
 					            	outStream.write(buff,0,readSize);
 					            }
 					    		fileInStream.close();
-								
-								
 							}
 							else
 								outStream.writeObject("Error");
@@ -201,33 +211,34 @@ public class MyWhatsServer {
 						
 						case A_MESSAGE:
 							contact = (String) inStream.readObject();
-							group = (String) inStream.readObject();
+							String group = (String) inStream.readObject();
 							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = addToGroup(user, contact, group);
-								outStream.writeObject(answer);
-							}
+							if(end.equals(MessageFlags.END_MESSAGE)) 
+								outStream.writeObject(addToGroup(user, contact, group));
 							else
 								outStream.writeObject("Error");
-						
 							break;
 						
 						case D_MESSAGE:
 							contact = (String) inStream.readObject();
 							group = (String) inStream.readObject();
 							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								answer = removeFromGroup(user, contact, group);
-								outStream.writeObject(result);
-							}
+							if(end.equals(MessageFlags.END_MESSAGE))
+								outStream.writeObject(removeFromGroup(user, contact, group));
 							else
 								outStream.writeObject("Error");
 							break;
-				
 					}	
 				}
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @param message
+			 * @return
+			 */
 			private String saveMessage(String username, String contact, String message) {
 				boolean result = Persistence.getInstance().saveMessage(username, contact, message);
 				if(result)
@@ -236,6 +247,14 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @param file
+			 * @param filename
+			 * @return
+			 */
 			private String saveFile(String username, String contact, File file, String filename) {
 				boolean result = Persistence.getInstance().saveFile(username, contact, file,filename);
 				if(result)
@@ -244,22 +263,47 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @return
+			 */
 			private String getMostRecentCommunications(String username) {
 				return Persistence.getInstance().getMostRecentCommunications(username);
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @return
+			 */
 			private String getAllContactCommunications(String username, String contact) {
-				String result =  Persistence.getInstance().getAllContactCommunications(username, contact);
+				String result = Persistence.getInstance().getAllContactCommunications(username, contact);
 				if(result == null)
 					return "Erro!";
 				else
 					return result;
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @param filename
+			 * @return
+			 */
 			private File getContactFile(String username, String contact, String filename) {
 				return Persistence.getInstance().getContactFile(username, contact, filename);
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @param groupname
+			 * @return
+			 */
 			private String addToGroup(String username, String contact, String groupname) {
 				boolean result = Persistence.getInstance().addToGroup(username, contact, groupname);
 				if(result)
@@ -268,6 +312,13 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 			
+			/**
+			 * 
+			 * @param username
+			 * @param contact
+			 * @param groupname
+			 * @return
+			 */
 			private String removeFromGroup(String username, String contact, String groupname) {
 				boolean result = Persistence.getInstance().removeFromGroup(username, contact, groupname);
 				if(result)
@@ -275,8 +326,6 @@ public class MyWhatsServer {
 				else
 					return "Erro!";
 			}
-			
-			
-			
-		}
+	}
+	
 }
