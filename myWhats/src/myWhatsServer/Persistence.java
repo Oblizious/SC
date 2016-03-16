@@ -515,6 +515,7 @@ public class Persistence {
 		if(!g.userIsLeader(username)) return false;
 		
 		//se chegou aqui entao estah pronto a adiciona ao grupo
+		//TODO se o user ja estah no grupo entao nao adiciona de novo ...
 		g.addUser(u);
 		return addToGroupFile(u, groupname);
 	}
@@ -697,7 +698,7 @@ public class Persistence {
 			return false;
 		
 		timestamps.put(path, timestamp);
-		BufferedWriter bw = new BufferedWriter(new FileWriter(groupsFile,true));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(timestampsFile,true));
 		bw.write(path + ":" + timestamp + "\n");
 		bw.close();
 		

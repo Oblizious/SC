@@ -69,7 +69,6 @@ public class MyWhatsStub {
     		int readSize;
     		
             while( (readSize = fileInStream.read(buff, 0, 1024)) != -1) {
-            	System.out.println(readSize);
                 objOutStream.write(buff,0,readSize);
             }
     		fileInStream.close();
