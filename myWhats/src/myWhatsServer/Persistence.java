@@ -423,9 +423,11 @@ public class Persistence {
 		StringBuilder sb = new StringBuilder();
 		for(File d : dirs) {
 			File mostRecent = getMostRecentFile(d);
-			sb.append("Contact: " + d.getName());
-			sb.append( "\n");
-			getFileData(mostRecent, sb);
+			if(mostRecent != null) {
+				sb.append("Contact: " + d.getName());
+				sb.append( "\n");
+				getFileData(mostRecent, sb);
+			}
 		}
 		
 		List<Group> groupList = new ArrayList<Group>(groups.values());
@@ -433,9 +435,11 @@ public class Persistence {
 			if(g.userBelongsToGroup(username)) {
 				File groupDir = new File("Data/" + g.getName());
 				File mostRecent = getMostRecentFile(groupDir);
-				sb.append("Contact: " + g.getName());
-				sb.append( "\n");
-				getFileData(mostRecent, sb);
+				if(mostRecent != null) {
+					sb.append("Contact: " + g.getName());
+					sb.append( "\n");
+					getFileData(mostRecent, sb);
+				}
 			}
 		}
 		return sb.toString();
@@ -531,7 +535,6 @@ public class Persistence {
 		}
 		
 		else {
-		
 			try {
 				BufferedReader br = new  BufferedReader (new FileReader(file));
 				String s;
