@@ -515,9 +515,9 @@ public class Persistence {
 		if(!g.userIsLeader(username)) return false;
 		
 		//se chegou aqui entao estah pronto a adiciona ao grupo
-		//TODO se o user ja estah no grupo entao nao adiciona de novo ...
+		//se o user ja estah no grupo entao nao adiciona de novo ...		
 		if(g.getMembers().contains(u))
-			return false;
+			return false; //TODO ainda falta testar !!!
 		//--
 		g.addUser(u);
 		return addToGroupFile(u, groupname);
