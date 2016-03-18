@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class Persistence {
 	private static final Persistence INSTANCE = new Persistence();
-	private final DateFormat TIMESTAMPFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private final DateFormat TIMESTAMPFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private final DateFormat FILENAMEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH mm ss SSS");
 	private File usersFile;
 	private Map<String,User> users;
@@ -110,9 +110,10 @@ public class Persistence {
 	}
 	
 	private synchronized void addTimestampToMap(String s) {
-		String [] v = s.split(":");
-		if(v.length == 2)
-			timestamps.put(v[0], Long.getLong(v[1]));
+		String [] v = s.split(";");
+		if(v.length == 2) 
+			timestamps.put(v[0], Long.parseLong(v[1].trim()));
+		
 	}
 	
 	/**
@@ -292,11 +293,6 @@ public class Persistence {
 		
 		try {
 			
-			if(!addFileToTimestamps(result, contact)) {
-				file.delete();
-				return false;
-			}
-			
 			InputStream inStream = new FileInputStream(file);
 			OutputStream outStream = new FileOutputStream(result);
 
@@ -311,6 +307,10 @@ public class Persistence {
 			outStream.close();
 			
 			file.delete();
+			
+			if(!addFileToTimestamps(result, contact))
+				return false;
+			
 			return true;
 
 			} catch (IOException e) {
@@ -711,7 +711,7 @@ public class Persistence {
 			timeFile.createNewFile();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(timeFile,true));
-		bw.write(path + ":" + Long.toString(timestamp) + "\n");
+		bw.write(path + ";" + Long.toString(timestamp) + "\n");
 		bw.close();
 		
 		return true;
