@@ -339,13 +339,16 @@ public class Persistence {
 		
 		long mostRecentTime = 0;
 		File mostRecent = null;
-		
-		for(File file : files) {
-			long aux = timestamps.get(file.getAbsolutePath());	
-			if(aux > mostRecentTime) {
-				mostRecent = file;
-				mostRecentTime = aux;
+		try {
+			for(File file : files) {
+				long aux = timestamps.get(file.getCanonicalPath());	
+				if(aux > mostRecentTime) {
+					mostRecent = file;
+					mostRecentTime = aux;
+				}
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return mostRecent;
 	}
@@ -381,7 +384,7 @@ public class Persistence {
 		for(Group g : groupList) {
 			if(g.userBelongsToGroup(username)) {
 				File groupDir = new File("Data/" + g.getName());
-				File mostRecent = getMostRecentFile(groupDir );
+				File mostRecent = getMostRecentFile(groupDir);
 				sb.append("Contact: " + g.getName());
 				sb.append( "\n");
 				getFileData(mostRecent, sb);
@@ -478,13 +481,13 @@ public class Persistence {
 					sb.append(s + "\n");
 			
 				br.close();
+				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
+				sb.append( "\n");
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		sb.append(TIMESTAMPFORMAT.format(timestamps.get(file)));
-		sb.append( "\n");
 	}
 	
 	/**
