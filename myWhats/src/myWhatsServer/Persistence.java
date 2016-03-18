@@ -33,7 +33,6 @@ public class Persistence {
 	private File groupsFile;
 	private Map<String, Group> groups;
 	private Map<String, Long> timestamps;
-	private File timestampsFile;
 	
 	/**
 	 * 
@@ -50,10 +49,9 @@ public class Persistence {
 			groupsFile.createNewFile();//cria ficheiro se este nao existe
 			groups = new HashMap<>();
 			
-			timestampsFile = new File("Data/timestamps");
-			timestampsFile.getParentFile().mkdirs();
-			timestampsFile.createNewFile();
 			timestamps = new HashMap<>();
+			if(!loadAllTimestamps())
+				System.exit(0);
 			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));			
 			String s;
@@ -78,12 +76,6 @@ public class Persistence {
 				}					
 				groups.put(g.getName(), g);
 			}			
-			r.close();
-			
-			r = new BufferedReader(new FileReader(timestampsFile));
-			while((s = r.readLine()) != null) {
-				addTimestampToMap(s);
-			}
 			r.close();
 			
 		} catch (Exception e) {	e.printStackTrace();}
@@ -210,13 +202,7 @@ public class Persistence {
 			File file2 = new File("./Data/" + contact + "/" + username + "/" + filename);
 			file2.getParentFile().mkdirs();
 		
-			try {
-				if(!addFileToTimestamps(file1))
-					return false;
-				
-				if(!addFileToTimestamps(file2))
-					return false;
-				
+			try {				
 				BufferedWriter w = new BufferedWriter(new FileWriter(file1));
 				w.write("me: " + message + "\n");
 				w.close();
@@ -225,6 +211,10 @@ public class Persistence {
 				w.write(username + ": " + message + "\n");
 				w.close();
 			
+				if(!addFileToTimestamps(file1, username) || 
+				   !addFileToTimestamps(file2, contact))
+					return false;	
+				
 			} catch (IOException e) {e.printStackTrace(); return false;}
 		}
 		else {
@@ -235,6 +225,10 @@ public class Persistence {
 					BufferedWriter w = new BufferedWriter(new FileWriter(file));
 					w.write(username + ": " + message + "\n");
 					w.close();
+					
+					if(!addFileToTimestamps(file, contact))
+						return false;
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -289,12 +283,19 @@ public class Persistence {
 		else
 			result = new File("Data/" + contact + "/" + username + "-)" + filename);
 		
+		if(result.exists()) {
+			file.delete();
+			return false;
+		}
+		
 		result.getParentFile().mkdirs();	
 		
 		try {
 			
-			if(!addFileToTimestamps(result))
+			if(!addFileToTimestamps(result, contact)) {
+				file.delete();
 				return false;
+			}
 			
 			InputStream inStream = new FileInputStream(file);
 			OutputStream outStream = new FileOutputStream(result);
@@ -694,17 +695,52 @@ public class Persistence {
 		}		
 	}
 	
-	private boolean addFileToTimestamps(File file) throws IOException {
-		String path = file.getAbsolutePath();
+	private boolean addFileToTimestamps(File file, String username) throws IOException {
+		String path = file.getCanonicalPath();
 		long timestamp = file.lastModified();
+		
 		if(timestamps.containsKey(path))
 			return false;
 		
 		timestamps.put(path, timestamp);
-		BufferedWriter bw = new BufferedWriter(new FileWriter(timestampsFile,true));
-		bw.write(path + ":" + timestamp + "\n");
+		File timeFile = new File("Data/" + username + "/timestamps");
+		if(!timeFile.exists())
+			timeFile.createNewFile();
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(timeFile,true));
+		bw.write(path + ":" + Long.toString(timestamp) + "\n");
 		bw.close();
 		
+		return true;
+	}
+	
+	private boolean loadAllTimestamps() throws IOException {
+		File dir = new File("Data/");
+		if(!dir.exists())
+			return false;
+		
+		File[] list = dir.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File file) {
+				return file.isDirectory();
+			}
+			
+		});
+	
+		File aux = null;
+		
+		for(File d : list) {
+			aux = new File(d.getAbsolutePath() + "/timestamps");
+			if(aux.exists() && aux.isFile()) {
+				BufferedReader bw = new BufferedReader(new FileReader(aux));
+				String s;
+				while((s = bw.readLine()) != null) {
+					addTimestampToMap(s);
+				}
+				bw.close();
+			}
+		}
 		return true;
 	}
 }
