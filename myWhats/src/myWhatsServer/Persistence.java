@@ -374,6 +374,9 @@ public class Persistence {
 
 			@Override
 			public boolean accept(File file) {
+				if(file.getName().equals("timestamps"))
+					return false;
+				
 				return file.isFile();
 			}
 			
@@ -460,6 +463,9 @@ public class Persistence {
 
 			@Override
 			public boolean accept(File file) {
+				if(file.getName().equals("timestamps"))
+					return false;
+				
 				return file.isFile();
 			}
 			
@@ -531,7 +537,7 @@ public class Persistence {
 			
 				br.close();
 				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
-				sb.append( "\n\n");
+				sb.append("\n\n");
 				
 			} catch (IOException e) {
 				e.printStackTrace();
