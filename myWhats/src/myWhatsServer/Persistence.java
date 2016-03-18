@@ -282,6 +282,9 @@ public class Persistence {
 		if(!isGroup) {
 			File file1 = new File("Data/" + username + "/" + contact + "/" + "me-)" + filename);
 			File file2 = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
+			file1.getParentFile().mkdirs();
+			file2.getParentFile().mkdirs();
+			
 			if(file1.exists() || file2.exists()) {
 				file.delete();
 				return false;

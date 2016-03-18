@@ -60,6 +60,8 @@ public class MyWhats {
                 case "-d":
                 	System.out.println(args.length > index + 2 ? removeFromGroup(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
                     break;
+                    
+                default: System.out.println("Comando não reconhecido.");
             }
         }
         else {
