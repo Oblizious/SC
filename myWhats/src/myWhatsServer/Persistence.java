@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -278,45 +279,86 @@ public class Persistence {
 			return false;
 		}
 		
-		File result;
-		if(!isGroup)
-			result = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
-		else
-			result = new File("Data/" + contact + "/" + username + "-)" + filename);
-		
-		if(result.exists()) {
-			file.delete();
-			return false;
-		}
-		
-		result.getParentFile().mkdirs();	
-		
-		try {
-			
-			InputStream inStream = new FileInputStream(file);
-			OutputStream outStream = new FileOutputStream(result);
-
-			byte[] buffer = new byte[1024];
-
-			int length;
-			while ((length = inStream.read(buffer)) > 0) {
-				outStream.write(buffer, 0, length);
-			}
-
-			inStream.close();
-			outStream.close();
-			
-			file.delete();
-			
-			if(!addFileToTimestamps(result, contact))
+		if(!isGroup) {
+			File file1 = new File("Data/" + username + "/" + contact + "/" + "me-)" + filename);
+			File file2 = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
+			if(file1.exists() || file2.exists()) {
+				file.delete();
 				return false;
+			}
 			
-			return true;
+			try {
+				InputStream inStream = new FileInputStream(file);
+				OutputStream outStream = new FileOutputStream(file1);
+				byte[] buffer = new byte[1024];
+
+				int length;
+				while ((length = inStream.read(buffer)) > 0) {
+					outStream.write(buffer, 0, length);
+				}
+
+				inStream.close();
+				outStream.close();
+			
+				if(!addFileToTimestamps(file1, username))
+					return false;
+			
+				inStream = new FileInputStream(file);
+				outStream = new FileOutputStream(file2);
+			
+				while ((length = inStream.read(buffer)) > 0) {
+					outStream.write(buffer, 0, length);
+				}
+
+				inStream.close();
+				outStream.close();
+			
+				if(!addFileToTimestamps(file2, contact))
+					return false;
+			
+				file.delete();
+				
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			File result = new File("Data/" + contact + "/" + username + "-)" + filename);
+		
+			if(result.exists()) {
+				file.delete();
+				return false;
+			}
+		
+			result.getParentFile().mkdirs();	
+		
+			try {
+			
+				InputStream inStream = new FileInputStream(file);
+				OutputStream outStream = new FileOutputStream(result);
+
+				byte[] buffer = new byte[1024];
+
+				int length;
+				while ((length = inStream.read(buffer)) > 0) {
+					outStream.write(buffer, 0, length);
+				}
+
+				inStream.close();
+				outStream.close();
+			
+				file.delete();
+			
+				if(!addFileToTimestamps(result, contact))
+					return false;
+			
+				return true;
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		
+		}
 		return false;
 	}
 	
@@ -423,6 +465,7 @@ public class Persistence {
 			
 		});
 		StringBuilder sb = new StringBuilder();
+		sb.append("Contact: " + contact + "\n");
 		for(File file : files) {
 			getFileData(file, sb);
 		}
@@ -467,9 +510,15 @@ public class Persistence {
 	 */
 	public void getFileData(File file, StringBuilder sb) {
 		if(file.getName().lastIndexOf(".") != -1) {
-			sb.append(file.getName().substring(0, file.getName().indexOf("-)")) + ": ");
-			sb.append(file.getName().substring(file.getName().indexOf("-)") + 2,  file.getName().length()));
-			sb.append( "\n");
+			try {
+				sb.append(file.getName().substring(0, file.getName().indexOf("-)")) + ": ");
+				sb.append(file.getName().substring(file.getName().indexOf("-)") + 2,  file.getName().length()));
+				sb.append( "\n");
+				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
+				sb.append( "\n\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		else {
@@ -482,7 +531,7 @@ public class Persistence {
 			
 				br.close();
 				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
-				sb.append( "\n");
+				sb.append( "\n\n");
 				
 			} catch (IOException e) {
 				e.printStackTrace();
