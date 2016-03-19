@@ -291,7 +291,7 @@ public class Persistence {
 		}
 		
 		if(!isGroup) {
-			File file1 = new File("Data/" + username + "/" + contact + "/" + "me-)" + filename);
+			File file1 = new File("Data/" + username + "/" + contact + "/" + username + "-)" + filename);
 			File file2 = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
 			file1.getParentFile().mkdirs();
 			file2.getParentFile().mkdirs();
@@ -477,6 +477,9 @@ public class Persistence {
 		else
 			dir = new File("Data/" + contact);
 		
+		if(!dir.exists())
+			return null;
+		
 		File[] files = dir.listFiles(new FileFilter() {
 
 			@Override
@@ -554,7 +557,7 @@ public class Persistence {
 				BufferedReader br = new  BufferedReader (new FileReader(file));
 				String s;
 				while((s = br.readLine()) != null) {
-					s.replace(username + ":", "me: ");
+					s = s.replace(username + ": ", "me: ");
 					sb.append(s + "\n");	
 				}
 			
