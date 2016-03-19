@@ -11,7 +11,7 @@ import java.net.Socket;
 import Resources.MessageFlags;
 
 /**
- * Classe que efetua a ligação entre o cliente e o servidor e 
+ * Classe cliente que efetua a ligação entre o cliente e o servidor e 
  * permite troca de dados de dados entre eles
  * @author Telmo Santos 44839, Luís Carvalho 44907
  *
@@ -101,7 +101,7 @@ public class MyWhatsStub {
     		objOutStream.writeObject(contact);
     		objOutStream.writeObject(filename);
     		objOutStream.writeObject(fileSize);
-    		
+
     		fileInStream = new FileInputStream(file);
     		int readSize;
     		

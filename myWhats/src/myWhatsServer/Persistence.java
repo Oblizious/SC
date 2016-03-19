@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ * Classe que garante a persistencia do servidor
  * @author Telmo Santos 44839, Luís Carvalho 44907
  *
  */
@@ -35,7 +35,7 @@ public class Persistence {
 	private Map<String, Long> timestamps;
 	
 	/**
-	 * 
+	 * Construtor da classe Persistence
 	 */
 	private Persistence() {		
 		try {
@@ -82,6 +82,14 @@ public class Persistence {
 	}
 	
 	/**
+	 * Obtem a unica instancia da classe Persistence, garantindo que é um singleton
+	 * @return instancia de Persistence
+	 */
+	public static Persistence getInstance() {
+        return INSTANCE;
+    }	
+	
+	/**
 	 * Cria um grupo a partir da sua reprsentacao em string
 	 * @param s Representacao em string do grupo com o seguinte formato grupo;master:user1:user2:...
 	 * @requires s != null
@@ -109,6 +117,11 @@ public class Persistence {
 		return g;
 	}
 	
+	/**
+	 * Adiciona a representação de um timestamp ao mapa de timestamps
+	 * @param s representação de um timestamp
+	 * @requires s != null
+	 */
 	private synchronized void addTimestampToMap(String s) {
 		String [] v = s.split(";");
 		if(v.length == 2) 
@@ -187,6 +200,9 @@ public class Persistence {
 	 * @return true se a mensagem foi guardada com sucesso, caso contrario false
 	 */
 	public synchronized boolean saveMessage(String username, String contact, String message){
+		if(username.equals(contact))
+			return false;
+		
 		Group group = groups.get(contact);
 		boolean isGroup = (group != null);
 		
@@ -205,7 +221,7 @@ public class Persistence {
 		
 			try {				
 				BufferedWriter w = new BufferedWriter(new FileWriter(file1));
-				w.write("me: " + message + "\n");
+				w.write(username + ": " + message + "\n");
 				w.close();
 			
 				w  = new BufferedWriter(new FileWriter(file2));
@@ -250,11 +266,7 @@ public class Persistence {
 			return null;
 		return new User(info[0], info[1]);
 	}
-	
-	public static Persistence getInstance() {
-        return INSTANCE;
-    }	
-	
+		
 	/**
 	 * Permite guardar um dado ficheiro enviado por um utilizador para 
 	 * um utilizador ou grupo
@@ -765,6 +777,16 @@ public class Persistence {
 		}		
 	}
 	
+	/**
+	 * Adiciona o timestamp de um novo ficheiro ao mapa de timestamps e 
+	 * ao ficheiro de timestamps 
+	 * @param file novo ficheiro do qual se vai o timestamp
+	 * @param username nome do utilizador
+	 * @requires file != null && username != null
+	 * @return true se o timestamp foi adicionado com sucesso
+	 *         false caso contrario 
+	 * @throws IOException
+	 */
 	private boolean addFileToTimestamps(File file, String username) throws IOException {
 		String path = file.getCanonicalPath();
 		long timestamp = file.lastModified();
@@ -784,6 +806,12 @@ public class Persistence {
 		return true;
 	}
 	
+	/**
+	 * Adiciona todos os timestamps em persistencia ao mapa de timestamps
+	 * @return true se os timestamps foram adicionados com sucesso
+	 *         false caso contrario
+	 * @throws IOException
+	 */
 	private boolean loadAllTimestamps() throws IOException {
 		File dir = new File("Data/");
 		if(!dir.exists())

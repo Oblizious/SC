@@ -12,15 +12,16 @@ import java.net.Socket;
 import Resources.MessageFlags;
 
 /**
- * 
- * @author lapc1
+ * Classe servidor que efetua a ligação entre o servidor e o cleinte e 
+ * permite troca de dados de dados entre eles
+ * @author Telmo Santos 44839, Luís Carvalho 44907
  *
  */
 public class MyWhatsServer {
 	
 	/**
-	 * 
-	 * @param args
+	 * Executa do servidor MyWhats
+	 * @param args numero do porto de ligação
 	 */
 	public static void main(String[] args) {
 		if(args.length < 1){
@@ -30,14 +31,15 @@ public class MyWhatsServer {
 		
 		int porto = Integer.parseInt(args[0]);
 		
-		System.out.println("servidor: main");
+		System.out.println("MyWhatsServer");
 		MyWhatsServer server = new MyWhatsServer();
 		server.startServer(porto);
 	}
 	
 	/**
-	 * 
-	 * @param porto
+	 * Inicia o servidor e espera por ligações de clientes
+	 * @param porto numero do porto de ligação
+	 * @requires porto > 0 
 	 */
 	public void startServer (int porto){
 		ServerSocket sSoc = null;
@@ -47,7 +49,7 @@ public class MyWhatsServer {
 			
 			while(true) {
 				try {
-					System.out.println("Waiting connection");
+					System.out.println("Waiting connections");
 					Socket inSoc = sSoc.accept();
 					System.out.println("New connection");
 					ServerThread newServerThread = new ServerThread(inSoc);
@@ -65,11 +67,10 @@ public class MyWhatsServer {
 		
 		
 	}
-	
-	//Threads utilizadas para comunicao com os clientes
+
 	/**
-	 * 
-	 * @author lapc1
+	 * Classe de thread que permite a comunicação ente o cliente e o servidor 
+	 * @author Telmo Santos 44839, Luís Carvalho 44907
 	 *
 	 */
 	private	class ServerThread extends Thread {
@@ -77,8 +78,9 @@ public class MyWhatsServer {
 			private Socket socket = null;
 
 			/**
-			 * 
-			 * @param inSoc
+			 * Constructor da thread que é executada para cada ligação ao servidor
+			 * @param inSoc socket de comunicação entre o servidor e o cliente
+			 * @requires inSoc != null
 			 */
 			ServerThread(Socket inSoc) {
 				socket = inSoc;
@@ -106,11 +108,13 @@ public class MyWhatsServer {
 			}
 			
 			/**
-			 * 
-			 * @param inStream
-			 * @param outStream
+			 * Recebe os dados vindos do cliente, determina quais as operações a serem executadas sobre o dados  
+			 * e envia uma resposta ao cliente 
+			 * @param inStream stream de recepção de dados vindos do cliente 
+			 * @param outStream stream de envio de dados para o cliente
 			 * @throws ClassNotFoundException
 			 * @throws IOException
+			 * @requires inSteam != null && outStream != null
 			 */
 			private void selectedOperation(ObjectInputStream inStream, ObjectOutputStream outStream) throws ClassNotFoundException, IOException {
 								
@@ -122,7 +126,7 @@ public class MyWhatsServer {
 				MessageFlags type = (MessageFlags)inStream.readObject();
 				
 				if(result == -1)
-					outStream.writeObject("Failed!!");
+					outStream.writeObject("Erro!");
 				else {
 					switch(type) {
 				
@@ -130,7 +134,7 @@ public class MyWhatsServer {
 							if(result == 0)
 								outStream.writeObject("Logged");
 							else if(result == 1)
-								outStream.writeObject("User Created");
+								outStream.writeObject("Utilizador criado");
 							break;
 						
 						case M_MESSAGE:
@@ -156,7 +160,8 @@ public class MyWhatsServer {
                             }
                             
                             fileOutStream.close();
-                            outStream.writeObject(saveFile(user, contact, file, filename));
+                           
+							outStream.writeObject(saveFile(user, contact, file, filename));
 							break;
 						
 						case R0_MESSAGE:
@@ -212,11 +217,14 @@ public class MyWhatsServer {
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @param message
-			 * @return
+			 * Acede à persistencia para guardar um mensagem trocada entre um 
+			 * utilizador e um outro utilizador ou grupo
+			 * @param username nome do utilizador que envia a mensagem
+			 * @param contact nome do utilizador que recebe a messagem
+			 * @param message texto da mensagem
+			 * @requires username != null && contact != null &&
+			 *           message != null
+			 * @return texto de resposta
 			 */
 			private String saveMessage(String username, String contact, String message) {
 				boolean result = Persistence.getInstance().saveMessage(username, contact, message);
@@ -227,15 +235,18 @@ public class MyWhatsServer {
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @param file
-			 * @param filename
-			 * @return
+			 * Acede à persistencia para guardar um ficheiro enviado de utilizador para um 
+			 * utilizador ou grupo
+			 * @param username nome do utilizador que envia o ficheiro
+			 * @param contact nome do utilizador que recebe o ficehiro
+			 * @param file ficheiro a ser enviado 
+			 * @param filename nome do ficheiro
+			 * @requires username != null && contact != null && 
+			 *           file != null && filename != null
+			 * @return texto de resposta
 			 */
 			private String saveFile(String username, String contact, File file, String filename) {
-				boolean result = Persistence.getInstance().saveFile(username, contact, file,filename);
+				boolean result = Persistence.getInstance().saveFile(username, contact, file, filename);
 				if(result)
 					return "Ficheiro guardado com sucesso!";
 				else

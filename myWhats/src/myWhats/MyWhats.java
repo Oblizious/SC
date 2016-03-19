@@ -12,7 +12,7 @@ import static myWhats.MyWhatsStub.*;
 public class MyWhats {
 
 	/**
-	 * Corre o cliente, recebendo os comandos do utilizador
+	 * Executa o cliente, recebendo os comandos do utilizador
 	 * @param args parametros de entrada:
 	 * 			   Index 0 -> nome do utilizador
 	 * 			   Index 1 -> endereço e porto do servidor
@@ -27,8 +27,18 @@ public class MyWhats {
 	 */
 	public static void main(String[] args) {
         
-		if(args.length < 3){
-			System.out.println("Uso errado. Comandos possiveis :");
+		if(args.length < 2){
+			System.out.println("Uso errado. Como correr: ");
+			System.out.println("myWhats <nome do utilizador> <endereço:porto do servidor>");
+			System.out.println("Comandos opcionais:");
+			System.out.println("-p <palavra-passe>");
+			System.out.println("-m <contacto> <messagem>");
+			System.out.println("-f <contacto>  <ficheiro>");
+			System.out.println("-r");
+			System.out.println("-r <contacto>");
+			System.out.println("-r <contacto> <ficheiro>");
+			System.out.println("-a <utilizador> <grupo>");
+			System.out.println("-d <utilizador> <grupo>");
 			System.exit(0); // para nao ir para ao código de baixo
         }
         
@@ -36,7 +46,7 @@ public class MyWhats {
         
         int index = -1;
         
-        if(args[2].equals("-p")){
+        if(args.length > 2 && args[2].equals("-p")){
             if(args.length >= 4) {
                 password = args[3];
                 index = 4;   
@@ -57,11 +67,11 @@ public class MyWhats {
         if(args.length >= index + 1)  {
             switch(args[index]){
                 case "-m":
-                    System.out.println(args.length > index + 2 ? sendMessage(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
+                    System.out.println(args.length > index + 2 ? sendMessage(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos: -m <contacto> <messagem>");
                     break;
                 
                 case "-f":
-                	System.out.println(args.length > index + 2 ? sendFile(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
+                	System.out.println(args.length > index + 2 ? sendFile(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos: -f <contacto> <ficheiro>");
                     break;
                  
                 case "-r":
@@ -74,11 +84,11 @@ public class MyWhats {
                     break;
                 
                 case "-a":
-                	System.out.println(args.length > index + 2 ? addToGroup(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
+                	System.out.println(args.length > index + 2 ? addToGroup(args[0], password, args[1], args[index + 1], args[index + 2]) : "Faltam argumentos: -a <contacto> <grupo>");
                     break;
                 
                 case "-d":
-                	System.out.println(args.length > index + 2 ? removeFromGroup(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos");
+                	System.out.println(args.length > index + 2 ? removeFromGroup(args[0], password,args[1], args[index + 1], args[index + 2]) : "Faltam argumentos: -d <contacto> <grupo>");
                     break;
                     
                 default: System.out.println("Comando não reconhecido.");
