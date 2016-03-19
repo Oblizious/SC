@@ -673,7 +673,7 @@ public class Persistence {
 		if(g == null)
 			return false;		
 		
-		if(!g.userIsLeader(username)) return false;
+		if(!g.userIsLeader(username) || !g.userBelongsToGroup(contact)) return false;
 		
 		//se chegou aqui entao estah pronto a remover do grupo
 		g.removeUser(u);
@@ -767,7 +767,13 @@ public class Persistence {
 			groupsFile.delete();
 			
 			File groupFile = new File ("Data/" + groupname);
+			if(!groupFile.exists())
+				return false;
 			File[] files = groupFile.listFiles();
+			
+			if(files.length == 0)
+				return false;
+			
 			for(File file : files) {
 				timestamps.remove(file.getCanonicalPath());
 				file.delete();
