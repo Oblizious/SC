@@ -1,4 +1,7 @@
 grant codeBase "file:bin/-" {
+	// connection related permissions
 	permission java.net.SocketPermission "localhost:23456", "connect,resolve";
+	
+	// directory and files related permissions
 	permission java.io.FilePermission "./-", "write";
 };
