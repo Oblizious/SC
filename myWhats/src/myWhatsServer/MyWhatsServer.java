@@ -180,7 +180,7 @@ public class MyWhatsServer {
 							if(answer instanceof File) {
 								
 								File fileAnswer = (File) answer;
-								outStream.writeObject("Ficheiro " + fileAnswer.getName() + "recebido.");
+								outStream.writeObject("Ficheiro " + filename + " recebido.");
 								
 								
 								byte[] buff = new byte[1024];
@@ -263,8 +263,12 @@ public class MyWhatsServer {
 				String result =  Persistence.getInstance().getMostRecentCommunications(username);
 				if(result == null)
 					return "Erro!";
-				else 
-					return result;
+				else {
+					if(result.equals(""))
+						return "Ainda não fez qualquer tipo de comunicação.\n";
+					else
+						return result;
+				}
 			}
 			
 			/**
@@ -277,7 +281,7 @@ public class MyWhatsServer {
 				String result = Persistence.getInstance().getAllContactCommunications(username, contact);
 				if(result == null)
 					return "Erro!";
-				else
+				else 
 					return result;
 			}
 			

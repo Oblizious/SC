@@ -88,9 +88,12 @@ public class MyWhatsStub {
      * @return o texto de resposta vindo do servidor
      */
     public static String sendFile(String localUser, String password, String serverAddress, String contact, String filename) {
+    	File file = new File("Client/" + filename);
+    	if(!file.exists())
+    		return "Erro!";
+    	
     	startConnection(localUser, password, serverAddress);
     	
-    	File file = new File("Client/" + filename);
     	FileInputStream fileInStream;
     	byte[] buff = new byte[1024];
     	long fileSize = file.length();
@@ -108,14 +111,16 @@ public class MyWhatsStub {
             while( (readSize = fileInStream.read(buff, 0, 1024)) != -1) {
                 objOutStream.write(buff,0,readSize);
             }
+            objOutStream.flush();
     		fileInStream.close();
     		
     		result = (String)objInStream.readObject();
+    		
     	} catch(IOException | ClassNotFoundException e) {
     		e.printStackTrace();
     	}
     	
-		closeConnection(socket, objInStream, objOutStream);
+    	closeConnection(socket, objInStream, objOutStream);
 		return result;
     }
     
