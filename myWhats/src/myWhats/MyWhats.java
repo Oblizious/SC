@@ -3,8 +3,28 @@ package myWhats;
 import java.util.Scanner;
 import static myWhats.MyWhatsStub.*;
 
+/**
+ * Classe que implementa o cliente da aplicação, recebendo 
+ * comandos do utilizador
+ * @author Telmo Santos 44839, Luís Carvalho 44907
+ *
+ */
 public class MyWhats {
 
+	/**
+	 * Corre o cliente, recebendo os comandos do utilizador
+	 * @param args parametros de entrada:
+	 * 			   Index 0 -> nome do utilizador
+	 * 			   Index 1 -> endereço e porto do servidor
+	 *             Paramtros opcionais:
+	 *             -> -p palavra-passe
+	 *             -> -m contacto messagem
+	 *             -> -f contacto ficheiro
+	 *             -> -r contacto ficheiro
+	 *             -> -a utilizador grupo
+	 *             -> -d utilizador grupo
+	 * 				
+	 */
 	public static void main(String[] args) {
         
 		if(args.length < 3){
@@ -70,6 +90,10 @@ public class MyWhats {
         }
     }    
     
+	/**
+	 * Pede ao utilizador que insira a paalavra-passe
+	 * @return palavra-passe inserida
+	 */
     private static String pedirPassword(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Insira password: ");

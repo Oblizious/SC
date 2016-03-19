@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -426,7 +425,7 @@ public class Persistence {
 			if(mostRecent != null) {
 				sb.append("Contact: " + d.getName());
 				sb.append( "\n");
-				getFileData(mostRecent, sb);
+				getFileData(mostRecent, sb, username);
 			}
 		}
 		
@@ -438,7 +437,7 @@ public class Persistence {
 				if(mostRecent != null) {
 					sb.append("Contact: " + g.getName());
 					sb.append( "\n");
-					getFileData(mostRecent, sb);
+					getFileData(mostRecent, sb, username);
 				}
 			}
 		}
@@ -480,7 +479,7 @@ public class Persistence {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Contact: " + contact + "\n");
 		for(File file : files) {
-			getFileData(file, sb);
+			getFileData(file, sb, username);
 		}
 		
 		return sb.toString();
@@ -521,10 +520,14 @@ public class Persistence {
 	 * @param sb StringBuilder onde vai ser escrito o conteudo do ficheiro
 	 * @requires file != null && sb != null
 	 */
-	public void getFileData(File file, StringBuilder sb) {
+	public void getFileData(File file, StringBuilder sb, String username) {
 		if(file.getName().lastIndexOf(".") != -1) {
 			try {
-				sb.append(file.getName().substring(0, file.getName().indexOf("-)")) + ": ");
+				String name = file.getName().substring(0, file.getName().indexOf("-)"));
+				if(name.equals(username))
+					name = "me";
+					
+				sb.append(name + ": ");
 				sb.append(file.getName().substring(file.getName().indexOf("-)") + 2,  file.getName().length()));
 				sb.append( "\n");
 				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
@@ -538,8 +541,10 @@ public class Persistence {
 			try {
 				BufferedReader br = new  BufferedReader (new FileReader(file));
 				String s;
-				while((s = br.readLine()) != null)
-					sb.append(s + "\n");
+				while((s = br.readLine()) != null) {
+					s.replace(username + ":", "me: ");
+					sb.append(s + "\n");	
+				}
 			
 				br.close();
 				sb.append(TIMESTAMPFORMAT.format(timestamps.get(file.getCanonicalPath())));
@@ -747,9 +752,10 @@ public class Persistence {
 			groupsFile.delete();
 			
 			File groupFile = new File ("Data/" + groupname);
-			String files[] = groupFile.list();
-			for(String filename : files) {
-				new File(filename).delete();
+			File[] files = groupFile.listFiles();
+			for(File file : files) {
+				timestamps.remove(file.getCanonicalPath());
+				file.delete();
 			}
 			groupFile.delete();
 			return temp.renameTo(groupsFile);

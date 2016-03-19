@@ -136,11 +136,7 @@ public class MyWhatsServer {
 						case M_MESSAGE:
 							String contact = (String) inStream.readObject();
 							String text = (String) inStream.readObject();
-							MessageFlags end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE))
-								outStream.writeObject(saveMessage(user, contact, text));
-							else
-								outStream.writeObject("Error");
+							outStream.writeObject(saveMessage(user, contact, text));
 							break;
 						
 						case F_MESSAGE:
@@ -160,39 +156,29 @@ public class MyWhatsServer {
                             }
                             
                             fileOutStream.close();
-                           
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE))
-								outStream.writeObject(saveFile(user, contact, file, filename));
-							else
-								outStream.writeObject("Error");
+                            outStream.writeObject(saveFile(user, contact, file, filename));
 							break;
 						
 						case R0_MESSAGE:
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE))
-								outStream.writeObject(getMostRecentCommunications(user));
-							else
-								outStream.writeObject("Error");
+							outStream.writeObject(getMostRecentCommunications(user));
 							break;
 						
 						case R1_MESSAGE:
 							contact = (String) inStream.readObject();
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE))
-								outStream.writeObject(getAllContactCommunications(user, contact));
-							else
-								outStream.writeObject("Error");
+							outStream.writeObject(getAllContactCommunications(user, contact));
 							break;
 						
 						case R2_MESSAGE:
 							contact = (String) inStream.readObject();
 							filename = (String) inStream.readObject();
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) {
-								File fileAnswer = getContactFile(user, contact, filename);
+							Object answer = getContactFile(user, contact, filename);
+							if(answer instanceof File) {
 								
-						    	byte[] buff = new byte[1024];
+								File fileAnswer = (File) answer;
+								outStream.writeObject("Ficheiro " + fileAnswer.getName() + "recebido.");
+								
+								
+								byte[] buff = new byte[1024];
 						    	long fileAnswerSize = fileAnswer.length();
 					    		
 					    		outStream.writeObject(fileAnswerSize);
@@ -200,33 +186,26 @@ public class MyWhatsServer {
 						    	FileInputStream  fileInStream = new FileInputStream(fileAnswer);
 					    		int readSize;
 					    		
-					            while( (readSize = fileInStream.read(buff, 0, 1024)) != -1) {
-					            	outStream.write(buff,0,readSize);
-					            }
+					        	while((readSize = fileInStream.read(buff, 0, 1024)) != -1) {
+					        		outStream.write(buff,0,readSize);
+					        	}
 					    		fileInStream.close();
-							}
-							else
-								outStream.writeObject("Error");
+					    		
+							} else if(answer instanceof String)
+								outStream.writeObject((String) answer);
+							
 							break;
 						
 						case A_MESSAGE:
 							contact = (String) inStream.readObject();
 							String group = (String) inStream.readObject();
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE)) 
-								outStream.writeObject(addToGroup(user, contact, group));
-							else
-								outStream.writeObject("Error");
+							outStream.writeObject(addToGroup(user, contact, group));
 							break;
 						
 						case D_MESSAGE:
 							contact = (String) inStream.readObject();
 							group = (String) inStream.readObject();
-							end = (MessageFlags) inStream.readObject();
-							if(end.equals(MessageFlags.END_MESSAGE))
-								outStream.writeObject(removeFromGroup(user, contact, group));
-							else
-								outStream.writeObject("Error");
+							outStream.writeObject(removeFromGroup(user, contact, group));
 							break;
 					}	
 				}
@@ -264,19 +243,24 @@ public class MyWhatsServer {
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @return
+			 * Acede à persistencia para obtem as comunicações mais recentes com cada dos contactos
+			 * @param username nome do utilizador
+			 * @requires result != null
+			 * @return as comunicações mais recentes ou erro
 			 */
 			private String getMostRecentCommunications(String username) {
-				return Persistence.getInstance().getMostRecentCommunications(username);
+				String result =  Persistence.getInstance().getMostRecentCommunications(username);
+				if(result == null)
+					return "Erro!";
+				else 
+					return result;
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @return
+			 * Acede à persistencia para obter todas as cominucações com um dado utilizador
+			 * @param username nome do utilizador
+			 * @param contact nome do utilizador com o qual se comunicou
+			 * @return todas as comunicações com um dado utilizador ou erro
 			 */
 			private String getAllContactCommunications(String username, String contact) {
 				String result = Persistence.getInstance().getAllContactCommunications(username, contact);
@@ -287,42 +271,55 @@ public class MyWhatsServer {
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @param filename
-			 * @return
+			 * Acede à persistencia para obtem um dado ficheiro
+			 * @param username nome do utilizador
+			 * @param contact nome do utitilizador que tem o ficheiro
+			 * @param filename nome do ficheiro
+			 * @requires username != null && contact != null &&
+			 *           filename != null
+			 * @return o ficheiro pretendido se existir,
+			 *         senão retorna uma messagem de erro
 			 */
-			private File getContactFile(String username, String contact, String filename) {
-				return Persistence.getInstance().getContactFile(username, contact, filename);
+			private Object getContactFile(String username, String contact, String filename) {
+				File result = Persistence.getInstance().getContactFile(username, contact, filename);
+				if(result == null)
+					return "Erro!";
+				else
+					return result;
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @param groupname
-			 * @return
+			 * Acede à persistencia para adicionar um utilizador a um grupo
+			 * e devolve uma string de resposta
+			 * @param username nome de utlizador
+			 * @param contact nome do utilizdor a ser adicionado ao grupo
+			 * @param groupname nome do grupo
+			 * @requires username != null && contact != null &&
+			 *           groupname != null
+			 * @return texto de resposta
 			 */
 			private String addToGroup(String username, String contact, String groupname) {
 				boolean result = Persistence.getInstance().addToGroup(username, contact, groupname);
 				if(result)
-					return "Utilizador adicionado ao grupo com sucesso";
+					return "Utilizador adicionado ao grupo com sucesso!";
 				else
 					return "Erro!";
 			}
 			
 			/**
-			 * 
-			 * @param username
-			 * @param contact
-			 * @param groupname
-			 * @return
+			 * Acede à persistencia para remover um utilizador de um grupo 
+			 * e devolve uma string de resposta
+			 * @param username nome do utilizdor
+			 * @param contact nome do utilizador a ser removido do grupo
+			 * @param groupname nome do grupo
+			 * @requires usernname != null && contact != null && 
+			 *           groupname != null
+			 * @return texto de resposta
 			 */
 			private String removeFromGroup(String username, String contact, String groupname) {
 				boolean result = Persistence.getInstance().removeFromGroup(username, contact, groupname);
 				if(result)
-					return "Utilizador removido do grupo com sucesso";
+					return "Utilizador removido do grupo com sucesso!";
 				else
 					return "Erro!";
 			}
