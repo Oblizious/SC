@@ -662,8 +662,7 @@ public class Persistence {
 	 */
 	public synchronized boolean removeFromGroup(String username, String contact, String groupname) {
 		if(username.equals(contact)){
-			deleteGroup(groupname);
-			return true;
+			return deleteGroup(groupname);
 		}
 		
 		User u = users.get(contact);
@@ -739,7 +738,7 @@ public class Persistence {
 	 */
 	public synchronized boolean deleteGroup(String groupname){
 		try{	
-			groups.remove(groups.get(groupname)); // apaga o grupo da memória
+			groups.remove(groupname); // apaga o grupo da memória
 			
 			File temp = new File("Data/groupsTMP");
 			
@@ -753,6 +752,7 @@ public class Persistence {
 				if(v.length < 2){
 					w.close();
 					r.close();
+					temp.delete();
 					return false; // ficheiro encontra-se corrumpido
 				}
 				
@@ -762,23 +762,28 @@ public class Persistence {
 			}	
 			
 			w.close();
-			r.close();		
-			
-			groupsFile.delete();
+			r.close();	
 			
 			File groupFile = new File ("Data/" + groupname);
-			if(!groupFile.exists())
+			if(!groupFile.exists()){
+				temp.delete();
 				return false;
+			}
 			File[] files = groupFile.listFiles();
 			
-			if(files.length == 0)
+			if(files.length == 0){
+				groupFile.delete();
+				groupsFile.delete();
+				temp.renameTo(groupsFile);
 				return false;
+			}
 			
 			for(File file : files) {
 				timestamps.remove(file.getCanonicalPath());
 				file.delete();
 			}
 			groupFile.delete();
+			groupsFile.delete();
 			return temp.renameTo(groupsFile);
 		}catch(IOException e){
 			e.printStackTrace();				
