@@ -200,7 +200,7 @@ public class MyWhatsStub {
     			long fileSize = (long) objInStream.readObject();
     			long alreadyRead = 0;
 			
-    			File file = new File("Client/Recieved/" + filename);
+    			File file = new File("Client/Received/" + filename);
     			FileOutputStream fileOutStream = new FileOutputStream(file);
     			byte[] buffer = new byte[1024];
 			
