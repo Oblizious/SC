@@ -30,7 +30,7 @@ public class MyWhats {
 		
 		File client = new File("Client/Send/");
 		client.mkdirs();
-		client = new File("Client/Recieved");
+		client = new File("Client/Received");
 		client.mkdirs();
         
 		if(args.length < 2){
