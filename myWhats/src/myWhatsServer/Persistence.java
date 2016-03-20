@@ -571,7 +571,7 @@ public class Persistence {
 	 * @param sb StringBuilder onde vai ser escrito o conteudo do ficheiro
 	 * @requires file != null && sb != null
 	 */
-	public void getFileData(File file, StringBuilder sb, String username) {
+	public synchronized void getFileData(File file, StringBuilder sb, String username) {
 		if(file.getName().lastIndexOf(".") != -1) {
 			try {
 				String name = file.getName().substring(0, file.getName().indexOf("-)"));
@@ -723,7 +723,7 @@ public class Persistence {
 	 * @return true se o utilizador foi removido com sucesso do ficheiro,
 	 *         false caso contrario 
 	 */
-	private boolean removeFromGroupFile(User u, String groupname) {
+	private synchronized boolean removeFromGroupFile(User u, String groupname) {
 		File temp = new File("Data/groupsTMP");
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(groupsFile));
@@ -837,7 +837,7 @@ public class Persistence {
 	 *         false caso contrario 
 	 * @throws IOException
 	 */
-	private boolean addFileToTimestamps(File file, String username) throws IOException {
+	private synchronized boolean addFileToTimestamps(File file, String username) throws IOException {
 		String path = file.getCanonicalPath();
 		long timestamp = file.lastModified();
 		
@@ -862,7 +862,7 @@ public class Persistence {
 	 *         false caso contrario
 	 * @throws IOException
 	 */
-	private boolean loadAllTimestamps() throws IOException {
+	private synchronized boolean loadAllTimestamps() throws IOException {
 		File dir = new File("Data/");
 		if(!dir.exists())
 			return false;
