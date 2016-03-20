@@ -1,5 +1,6 @@
 package myWhats;
 
+import java.io.File;
 import java.util.Scanner;
 import static myWhats.MyWhatsStub.*;
 
@@ -26,6 +27,11 @@ public class MyWhats {
 	 * 				
 	 */
 	public static void main(String[] args) {
+		
+		File client = new File("Client/Send/");
+		client.mkdirs();
+		client = new File("Client/Recieved");
+		client.mkdirs();
         
 		if(args.length < 2){
 			System.out.println("Uso errado. Como correr: ");

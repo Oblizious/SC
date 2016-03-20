@@ -64,8 +64,6 @@ public class MyWhatsServer {
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}
-		
-		
 	}
 
 	/**
@@ -84,7 +82,7 @@ public class MyWhatsServer {
 			 */
 			ServerThread(Socket inSoc) {
 				socket = inSoc;
-				System.out.println("thread do server para cada cliente");
+				System.out.println("Thread criada");
 			}
 	 
 			public void run(){
@@ -341,5 +339,4 @@ public class MyWhatsServer {
 					return "Erro!";
 			}
 	}
-	
 }
