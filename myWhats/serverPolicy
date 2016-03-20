@@ -4,7 +4,7 @@ grant codeBase "file:bin/-" {
 	permission java.net.SocketPermission "*:1024-", "accept";
 	
 	// directory and files related permissions
-	permission java.io.FilePermission "Data", "read";
+	permission java.io.FilePermission "Data", "read,write";
 	permission java.io.FilePermission "Data/-", "read,write,delete";
 	permission java.util.PropertyPermission "user.dir", "read";
 };
