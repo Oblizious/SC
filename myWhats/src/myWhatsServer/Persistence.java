@@ -57,6 +57,9 @@ public class Persistence {
 			if(!loadAllTimestamps())
 				System.exit(0);
 			
+			File tmp = new File("tmp"); //diretorio temporario que recebe ficheiros vindos do servidor
+			tmp.mkdir();
+			
 			BufferedReader r = new BufferedReader(new FileReader(usersFile));			
 			String s;
 			while((s = r.readLine()) != null){

@@ -147,7 +147,7 @@ public class MyWhatsServer {
 							long fileSize = (long) inStream.readObject();
 							long alreadyRead = 0;
 							
-							File file = new File(filename);
+							File file = new File("tmp/" + filename);
 							FileOutputStream fileOutStream = new FileOutputStream(file);
 							byte[] buffer = new byte[1024];
 							
