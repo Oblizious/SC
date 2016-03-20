@@ -13,11 +13,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Classe que garante a persistencia do servidor
@@ -338,8 +342,14 @@ public class Persistence {
 			}
 		}
 		else {
+			String [] files = new File("Data/" + contact).list();
+			for(String f : files) {
+				if(f.contains(filename)) {
+					return false;
+				}
+			}
 			File result = new File("Data/" + contact + "/" + username + "-)" + filename);
-		
+			
 			if(result.exists()) {
 				file.delete();
 				return false;
@@ -492,11 +502,31 @@ public class Persistence {
 			
 		});
 		StringBuilder sb = new StringBuilder();
-		sb.append("Contact: " + contact + "\n");
-		for(File file : files) {
-			getFileData(file, sb, username);
+		if(files.length == 0) {
+			sb.append("Não ainda foram efectuadas comunicações.");
 		}
-		
+		else {
+			sb.append("Contact: " + contact + "\n");
+			ArrayList<Entry<File, Long>> list = new ArrayList<>();
+			for(File file : files) {
+				try {
+					list.add(new AbstractMap.SimpleEntry<File, Long>(file, timestamps.get(file.getCanonicalPath())));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			Collections.sort(list, new Comparator<Entry<File, Long>>() {
+
+				@Override
+				public int compare(Entry<File, Long> arg0, Entry<File, Long> arg1) {
+					return (arg0.getValue().compareTo(arg1.getValue()));
+				}
+			});
+			
+			for(Entry<File, Long> entry : list) {
+				getFileData(entry.getKey(), sb, username);
+			}
+		}
 		return sb.toString();
 	}
 	
@@ -515,14 +545,20 @@ public class Persistence {
 		if(users.get(contact) == null && !isGroup)
 			return null;	
 		
-		File file;
+		File file = null;
 		
 		if(!isGroup)
 			file = new File("Data/" + contact + "/" + username + "/" + username + "-)" + filename);
-		else
-			file = new File("Data/" + contact + "/" + username + "-)" + filename);
-		
-		if(!file.exists())
+		else {
+			String [] files = new File("Data/" + contact).list();
+			for(String f : files) {
+				if(f.contains(filename)) {
+					file = new File("Data/" + contact + "/" + f);
+					break;
+				}
+			}
+		}
+		if(file == null || !file.exists())
 			return null;
 		
 		return file;
@@ -602,8 +638,8 @@ public class Persistence {
 		//se chegou aqui entao estah pronto a adiciona ao grupo
 		//se o user ja estah no grupo entao nao adiciona de novo ...		
 		if(g.getMembers().contains(u))
-			return false; //TODO ainda falta testar !!!
-		//--
+			return false; 
+		
 		g.addUser(u);
 		return addToGroupFile(u, groupname);
 	}
@@ -775,7 +811,7 @@ public class Persistence {
 				groupFile.delete();
 				groupsFile.delete();
 				temp.renameTo(groupsFile);
-				return false;
+				return true;
 			}
 			
 			for(File file : files) {

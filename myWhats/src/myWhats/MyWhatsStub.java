@@ -297,7 +297,8 @@ public class MyWhatsStub {
 			objOutStream = new ObjectOutputStream(socket.getOutputStream());
 			
 		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
+			System.out.println("De momento não é possivel estabelecer ligação com o servidor.");
+			System.exit(0);
 		}
     }
 
