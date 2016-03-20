@@ -88,7 +88,7 @@ public class MyWhatsStub {
      * @return o texto de resposta vindo do servidor
      */
     public static String sendFile(String localUser, String password, String serverAddress, String contact, String filename) {
-    	File file = new File("Client/" + filename);
+    	File file = new File("Client/Send/" + filename);
     	if(!file.exists())
     		return "Erro!";
     	
@@ -200,7 +200,7 @@ public class MyWhatsStub {
     			long fileSize = (long) objInStream.readObject();
     			long alreadyRead = 0;
 			
-    			File file = new File(filename);
+    			File file = new File("Client/Recieved/" + filename);
     			FileOutputStream fileOutStream = new FileOutputStream(file);
     			byte[] buffer = new byte[1024];
 			
