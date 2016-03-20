@@ -2,7 +2,7 @@ package myWhatsServer;
 
 /**
  * Classe que representa um utilizador que possui um nome e uma palavra-passe
- * @author 44839 Telmo Santos , 44907 Luís Carvalho 
+ * @author Telmo Santos 44839, Luís Carvalho 44907
  */
 public class User {
 	private String username;

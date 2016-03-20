@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Classe que representa grupo que tem um nome e é constituido por um lider e 
  * por varios utilizadores
- * @author 44839 Telmo Santos , 44907 Luís Carvalho 
+ * @author Telmo Santos 44839, Luís Carvalho 44907
  */
 public class Group {
 	
